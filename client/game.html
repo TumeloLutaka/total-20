@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Total Twenty</title>
+</head>
+<body>
+    <h1>Total Twenty Game Screen</h1>
+
+    <h2>GAME STATUS: <span id="game_status"></span></h2> 
+    <h2>ROUND: <span id="round_info"></span> PLAYER <span id="player_turn_info"></span>'S TURN</h2>
+    
+    <button id="btn-draw_card">Draw Card</button>
+    <button id="btn-play_card">Play Card</button>
+    <button id="btn-stand_user">Stand</button>
+    <button id="btn-end_turn">End turn</button>
+
+    <h3><span id="player_info"></span> | HAS STOOD:<span id="player_stood"></span> </h3>
+    <h3>SCORES:</h3>
+    <p>Player 1| <span id="player_score_1"></span> | <span id="player_score_2"></span> |Player 2</p>
+    <p>Player 1 Last Card| <span id="player_last_card_1"></span> | <span id="draw_last_card"></span> | <span id="player_last_card_2"></span> |Player 2 Last Card</p>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="/javascript/game.js"></script>
+</body>
+</html>
