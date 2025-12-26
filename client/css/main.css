@@ -1,0 +1,21 @@
+#hand-wrapper {
+    display:flex;
+    gap: 5px;
+}
+
+.card {
+    background-color: hsl(160, 77%, 60%);
+    min-width: 50px;
+    width: 2.6vw;
+    aspect-ratio: 1 / 1.4;
+    cursor: pointer;
+    transition: all 0.1s ease; /* Smooths out color and scale changes */
+}
+.card:hover {
+    background-color: hsl(160, 77%, 70%);
+}
+.card:active {
+    transform: scale(0.95);
+    background-color: hsl(160, 77%, 50%); /* Darkens further than the base color */
+}
+

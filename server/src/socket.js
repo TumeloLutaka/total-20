@@ -1,9 +1,9 @@
 import { SocketEvents } from "../../client/shared/socketEvents.js";
 
-let io = null
+let io = null;
 
 export const socketHandler = (_io, gameManager) => {
-  io = _io
+  io = _io;
 
   io.on("connection", (socket) => {
     console.log("A user connected", socket.id);
@@ -72,6 +72,9 @@ function gameHandler(io, socket, gameManager) {
     // Get game state associated with room
     const gameState = gameManager.getGame(actionData.roomId);
 
+    // Don't process any actions if the game is done.
+    if (gameState.status === "Game Over") return;
+
     // Check if the player making the call is on their turn
     if (gameState.currentPlayer !== actionData.playerIndex) return;
 
@@ -81,80 +84,109 @@ function gameHandler(io, socket, gameManager) {
   });
 }
 
-function evaluateRound(gameState) {
-  // Get the current player
-  const [player1, player2] = gameState.players;
-  const currentPlayer = gameState.players[gameState.currentPlayer];
-
-  // Check if both players have are at 20
-  if (currentPlayer.score === 20) currentPlayer.hasStood = true;
-
-  if (!player1.hasStood || !player2.hasStood) return;
-
-  const scoreDifference = player1.score - player2.score;
-
-  if (scoreDifference === 0) {
-    // draw
-  } else if (scoreDifference > 0) {
-    // player 1 wins
-  } else {
-    // player 2 wins
-  }
-}
-
+// ========== FUNCTIONS ========== \\
 function parseActionStream(io, gameState) {
   // Get action data
   const actionData = gameState.actionStream[gameState.actionStream.length - 1];
+  if (!actionData) return; // Exit if the stream is empty
+
+  const activePlayer = gameState.players[actionData.playerIndex];
 
   let sendGameState = true;
 
   switch (actionData.action) {
-    case "add_score":
+    case "add_score": // Trigger: Player draws cards. Player plays card.
+      // Get player
+      const activeCard =
+        actionData.caller === "server"
+          ? actionData.drawnCard
+          : activePlayer.hand[actionData.cardIndex];
+
       // Change player score based on provided amount.
-      gameState.players[actionData.playerIndex].score += actionData.increaseAmount;
+      let multipler = activeCard.type === "red" ? -1 : 1;
+      activePlayer.score += activeCard.number * multipler;
+
+      // Check who called the add functionality to determine where the top card will change
+      if (actionData.caller === "server") {
+        // Set the gameboard top card to newly drawn card
+        gameState.gameBoard.topCard = activeCard.number;
+      } else if (actionData.caller === "player") {
+        // Set the player top card to newly drawn card
+        activePlayer.topCard = activeCard.number;
+
+        // Filter out the drawn card from the player's hand.
+        activePlayer.hand = activePlayer.hand.filter((card, index) => {
+          return index !== actionData.cardIndex;
+        });
+      }
+
+      // Auto stand player if they hit 20
+      if (activePlayer.score === 20) {
+        gameState.actionStream.push({
+          ...actionData,
+          action: "stand_user",
+        });
+
+        sendGameState = false;
+        parseActionStream(io, gameState)
+        break
+      }
 
       // Set next phase info
       gameState.status = actionData.nextPhase;
-
-      // Check who called the add functionality to determine where the top card will change
-      if (actionData.caller === "server")
-        gameState.gameBoard.topCard = actionData.increaseAmount;
-      else
-        gameState.players[actionData.playerIndex].topCard =
-          actionData.increaseAmount;
-
-      evaluateRound(gameState);
       break;
     case "draw_card":
+      // Validation: Must be their turn and they haven't drawn/played yet
+      if (activePlayer.hasDrawn) {
+        sendGameState = false;
+        break;
+      }
+
+      activePlayer.hasDrawn = true; // Lock drawing for this turn.
       gameState.status = actionData.nextPhase;
+
       const random = Math.floor(Math.random() * 10) + 1;
       gameState.actionStream.push({
         ...actionData,
         action: "add_score",
-        increaseAmount: random,
-        nextPhase: "Playing",
+        drawnCard: { number: random, type: "purple" },
+        nextPhase: "Playing", // Stay in playing phase so they can choose to play a card
         caller: "server",
       });
       parseActionStream(io, gameState);
       sendGameState = false;
       break;
-    case "end_turn":
+    case "end_turn": // Trigger: Player ends turn. Player stands.
+      // Reset flags for the player who just finished
+      activePlayer.hasDrawn = false;
+      activePlayer.hasPlayed = false;
+
+      // Checking for win conditions.
+      evaluateRound(gameState);
+
+      // Switch active player
       gameState.currentPlayer = gameState.currentPlayer === 0 ? 1 : 0;
-      gameState.status = actionData.nextPhase;
+      if (gameState.status !== "Game Over")
+        gameState.status = actionData.nextPhase;
       break;
     case "play_card":
+      if (!activePlayer.hasDrawn || activePlayer.hasPlayed) {
+        sendGameState = false;
+        break;
+      }
+
+      activePlayer.hasPlayed = true; // Lock play for this turn
+
       gameState.actionStream.push({
-        roomId: actionData.roomId,
+        ...actionData,
         action: "add_score",
-        increaseAmount: actionData.cardInfo,
-        playerIndex: actionData.playerIndex,
-        nextPhase: "Playing",
+        nextPhase: "End Phase", // Move to end phase automatically after playing
         caller: "player",
       });
       parseActionStream(io, gameState);
       sendGameState = false;
       break;
-    case "stand_user":
+    case "stand_user": // Tiggers: Stand Button. When player hits 20.
       gameState.players[actionData.playerIndex].hasStood = true;
       const actionStreamData = {
         ...actionData,
@@ -174,4 +206,41 @@ function parseActionStream(io, gameState) {
 
   if (sendGameState)
     io.to(actionData.roomId).emit(SocketEvents.S2C.SEND_GAME_STATE, gameState);
+
+  function evaluateRound(gameState) {
+    // Get the current player
+    const [player1, player2] = gameState.players;
+
+    const resolveSet = (winner) => {
+      if (winner) {
+        winner.points += 1;
+
+        if (winner.points === 2) {
+          gameState.status = "Game Over";
+          gameState.winner = winner.name;
+          return; // Stop here, don't reset for a new set
+        }
+      }
+
+      // Reset for next set
+      player1.score = 0;
+      player2.score = 0;
+      player1.hasStood = false;
+      player2.hasStood = false;
+      player1.topCard = null;
+      player2.topCard = null;
+      gameState.round++;
+    };
+
+    // 1. Check for busts
+    if (player1.score > 20) return resolveSet(player2);
+    if (player2.score > 20) return resolveSet(player1);
+
+    // 2. Both Stood? Compare scores.
+    if (player1.hasStood && player2.hasStood) {
+      if (player1.score > player2.score) resolveSet(player1);
+      else if (player2.score > player1.score) resolveSet(player2);
+      else resolveSet(null);
+    }
+  }
 }

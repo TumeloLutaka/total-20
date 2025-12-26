@@ -5,14 +5,16 @@ const socket = io();
 // ========== BUTTONS TO BE DELETED ========== \\
 const btnDrawCard = document.getElementById("btn-draw_card");
 const btnEndTurn = document.getElementById("btn-end_turn");
-const btnPlayCard = document.getElementById("btn-play_card");
 const btnStandUser = document.getElementById("btn-stand_user");
 
 // ========== HTML ELEMENTS TO BE DELETED ========== \\
 const drawLastCard = document.getElementById("draw_last_card");
+const handWrapper = document.getElementById("hand-wrapper");
 const playerInfo = document.getElementById("player_info");
 const playerLastCard1 = document.getElementById("player_last_card_1");
 const playerLastCard2 = document.getElementById("player_last_card_2");
+const playerPoints1 = document.getElementById("player_1_points");
+const playerPoints2 = document.getElementById("player_2_points");
 const playerScore1 = document.getElementById("player_score_1");
 const playerScore2 = document.getElementById("player_score_2");
 const playerStood = document.getElementById("player_stood");
@@ -46,17 +48,6 @@ btnEndTurn.addEventListener("click", () => {
     nextPhase: "End Phase",
   });
 });
-btnPlayCard.addEventListener("click", () => {
-  if (!canPlay()) return;
-
-  const random = Math.floor(Math.random() * 10) + 1;
-
-  createActionStreamData({
-    action: "play_card",
-    nextPhase: "Main Phase",
-    cardInfo: random,
-  });
-});
 btnStandUser.addEventListener("click", () => {
   if (!canPlay()) return;
 
@@ -65,31 +56,34 @@ btnStandUser.addEventListener("click", () => {
   });
 });
 
+// ========== SOCKET.IO EVENTS LISTENER ========== \\
 socket.on(SocketEvents.S2C.SEND_GAME_STATE, (_GameState) => {
   gameState = _GameState;
+  const players = gameState.players;
 
   playerIndex =
     gameState.players[0].id === sessionStorage.getItem("username") ? 0 : 1;
 
   drawLastCard.textContent = gameState.gameBoard.topCard;
-  playerInfo.textContent = gameState.players[playerIndex].tag;
+  playerInfo.textContent = players[playerIndex].tag;
   roundInfo.textContent = gameState.round;
-  playerLastCard1.textContent = gameState.players[0].topCard;
-  playerLastCard2.textContent = gameState.players[1].topCard;
-  playerScore1.textContent = gameState.players[0].score;
-  playerScore2.textContent = gameState.players[1].score;
-  playerStood.textContent = gameState.players[playerIndex].hasStood
-    ? "Stood"
-    : "Playing";
+  playerLastCard1.textContent = players[0].topCard;
+  playerLastCard2.textContent = players[1].topCard;
+  playerPoints1.textContent = players[0].points;
+  playerPoints2.textContent = players[1].points;
+  playerScore1.textContent = players[0].score;
+  playerScore2.textContent = players[1].score;
+  playerStood.textContent = players[playerIndex].hasStood ? "Stood" : "Playing";
   playerTurnInfo.textContent = gameState.currentPlayer + 1;
   status.textContent = gameState.status;
 
-  evaluateGameState()
+  renderHand(players[playerIndex].hand);
+
+  evaluateGameState();
 });
 
+// ========== FUNCTIONS ========== \\
 function createActionStreamData(overrides = {}) {
-  console.log(playerIndex);
-
   actionStreamData = {
     roomId,
     playerIndex: playerIndex,
@@ -104,20 +98,46 @@ function canPlay() {
   // Not this player's turn
   if (gameState.currentPlayer !== playerIndex) return false;
 
-  if (gameState.players[playerIndex].hasStood) 
-    
-    return false;
+  if (gameState.players[playerIndex].hasStood) return false;
 
   return true;
 }
 
 function evaluateGameState() {
-  if(gameState.currentPlayer === playerIndex && gameState.players[playerIndex].hasStood)
+  const player = gameState.players[playerIndex];
 
-    // End turn
-    createActionStreamData({
-    action: "stand_user",
+  if (gameState.currentPlayer === playerIndex && player.hasStood) {
+    createActionStreamData({ action: "stand_user" });
+  }
+}
+
+function playCard(cardIndex) {
+  if (!canPlay()) return;
+
+  createActionStreamData({
+    action: "play_card",
+    cardIndex,
   });
+}
+
+function renderHand(hand) {
+  // 1. Clear the existing children
+  handWrapper.replaceChildren();
+
+  // 2. Create the fragment (the staging area)
+  const fragment = document.createDocumentFragment();
+
+  // 3. Add items to the fragment (no reflows happen here!)
+  for (let i = 0; i < hand.length; i++) {
+    const cardDiv = document.createElement("cardDiv");
+    cardDiv.classList.add("card");
+    cardDiv.textContent = `${hand[i].type} | ${hand[i].number}`;
+    cardDiv.addEventListener("click", () => playCard(i));
+    fragment.appendChild(cardDiv);
+  }
+
+  // 4. Append the fragment to the live list (only 1 reflow happens here!)
+  handWrapper.appendChild(fragment);
 }
 
 function socketCall(command) {
