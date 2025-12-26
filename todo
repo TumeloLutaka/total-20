@@ -1,1 +1,2 @@
 change sessionStorage to local storage main.js and game.js
+Change the socket ID location from within player object to server.

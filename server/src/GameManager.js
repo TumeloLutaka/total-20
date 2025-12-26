@@ -1,3 +1,5 @@
+import { Socket } from "socket.io";
+
 // gameManager.js
 class GameManager {
   constructor() {
@@ -11,9 +13,10 @@ class GameManager {
       round: 1,
       status: "waiting",
       actionStream: [],
-      addPlayer(username) {
+      addPlayer(username, socketId) {
         this.players.push({
           id: username,
+          socketId,
           hand: GenerateHand(),
           hasDrawn: false,
           hasPlayed: false,
@@ -22,6 +25,7 @@ class GameManager {
           score: 0,
           tag: "Player " + (this.players.length + 1),
           topCard: "",
+          position: this.players.length
         });
       },
       gameBoard: {

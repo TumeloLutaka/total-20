@@ -3,6 +3,7 @@ export const SocketEvents = {
     ACTION_STREAM:"action stream",
     GET_GAME: "get game",
     JOIN_ROOM: "join room",
+    REGISTER_SOCKET: "register socket"
   },
   S2C: {
     GAME_START: "game start",

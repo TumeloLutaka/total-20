@@ -55,7 +55,7 @@ function gameHandler(io, socket, gameManager) {
     socket.join(userData.roomId);
 
     const gameState = gameManager.getGame(userData.roomId);
-    gameState.addPlayer(userData.username);
+    gameState.addPlayer(userData.username, socket.id);
 
     // Find game related to room
     if (gameState.players.length === 2) {
@@ -128,8 +128,8 @@ function parseActionStream(io, gameState) {
         });
 
         sendGameState = false;
-        parseActionStream(io, gameState)
-        break
+        parseActionStream(io, gameState);
+        break;
       }
 
       // Set next phase info
@@ -204,8 +204,33 @@ function parseActionStream(io, gameState) {
       console.log("Parse action stream Switch failed.");
   }
 
-  if (sendGameState)
-    io.to(actionData.roomId).emit(SocketEvents.S2C.SEND_GAME_STATE, gameState);
+  sendGameStateToPlayers(io, gameState);
+
+  function sendGameStateToPlayers(io, gameState) {
+    const [player1, player2] = gameState.players;
+
+    const player1Socket = player1.socketId;
+    const player2Socket = player2.socketId;
+
+    const p1Data = {
+      ...gameState,
+      players: [
+        { ...player1 },
+        { ...player2, hand: null, handCount: player2.hand.length },
+      ],
+    };
+
+    const p2Data = {
+      ...gameState,
+      players: [
+        { ...player1, hand: null, handCount: player1.hand.length },
+        { ...player2 },
+      ],
+    };
+
+    io.to(player1Socket).emit(SocketEvents.S2C.SEND_GAME_STATE, p1Data);
+    io.to(player2Socket).emit(SocketEvents.S2C.SEND_GAME_STATE, p2Data);
+  }
 
   function evaluateRound(gameState) {
     // Get the current player
