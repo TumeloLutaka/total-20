@@ -155,6 +155,7 @@ body {
   grid-template-areas:
     "opp opp opp"
     "pile1 draw pile2"
+    "point1 draw point2"
     "hand hand hand";
 }
 
@@ -207,6 +208,14 @@ body {
   grid-area: pile2;
 }
 
+.ph1 {
+  grid-area: "point1";
+}
+
+.ph2 {
+  grid-area: "point2";
+}
+
 .player-hand {
   grid-area: hand;
 }
@@ -219,6 +228,5 @@ body {
 .points-holder {
   display: grid;
   place-items: center;
-  width: 50%;
   border: 2px dashed rgba(255, 255, 255, 1); /* Helper lines to see the layout */
 }

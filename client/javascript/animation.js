@@ -67,6 +67,7 @@ function moveCard(card, targetPile) {
 
 function moveAndFlipCard(cardOuter, targetPile) {
   const target = targetPile.firstChild;
+  console.log(targetPile);
   const cardInner = cardOuter.querySelector(".card-inner");
 
   // 1. Capture current bounding rect
