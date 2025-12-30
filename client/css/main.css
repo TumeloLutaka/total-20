@@ -1,5 +1,12 @@
-#hand-wrapper {
+#draw_deck-wrapper {
     display:flex;
+    justify-content: center;
+    padding: 5px;
+}
+
+#hand-wrapper, #opponent_hand-wrapper {
+    display:flex;
+    justify-content: space-between;
     gap: 5px;
 }
 

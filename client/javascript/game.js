@@ -32,6 +32,7 @@ const roomId = window.location.pathname.split("/").pop();
 let actionStreamData = {};
 let gameState = {};
 let player = null;
+let playerIndex = ""; // TODO: Remove the playerIndex functionality replace with better authentication method.
 let opponent = null;
 
 socketCall(SocketEvents.C2S.GET_GAME);
@@ -71,9 +72,11 @@ socket.on(SocketEvents.S2C.SEND_GAME_STATE, (_GameState) => {
       ? gameState.players[1]
       : gameState.players[0];
   opponent =
-    gameState.players[0].hand !== null
-      ? gameState.players[0]
-      : gameState.players[1];
+    player === gameState.players[0]
+      ? gameState.players[1]
+      : gameState.players[0];
+
+  playerIndex = gameState.players[0].hand === null ? 1 : 0;
 
   drawLastCard.textContent = gameState.gameBoard.topCard;
   playerInfo.textContent = player.tag;
@@ -89,7 +92,7 @@ socket.on(SocketEvents.S2C.SEND_GAME_STATE, (_GameState) => {
   status.textContent = gameState.status;
 
   renderHand(player.hand);
-  renderOpponentHand(opponent.handCount);
+  renderOpponentHand();
 
   evaluateGameState();
 });
@@ -131,7 +134,7 @@ function playCard(cardIndex) {
 }
 
 function renderHand(hand) {
-  if (player === null) return;
+  if (hand === null) return;
 
   // 1. Clear the existing children
   handWrapper.replaceChildren();
@@ -151,8 +154,10 @@ function renderHand(hand) {
   // 4. Append the fragment to the live list (only 1 reflow happens here!)
   handWrapper.appendChild(fragment);
 }
+
 function renderOpponentHand() {
-  if (opponentHandWrapper === null) return;
+  console.log(opponent);
+  if (opponent === null) return;
 
   // 1. Clear the existing children
   opponentHandWrapper.replaceChildren();

@@ -76,6 +76,7 @@ function gameHandler(io, socket, gameManager) {
     if (gameState.status === "Game Over") return;
 
     // Check if the player making the call is on their turn
+    // TODO Change the validation of currentPlayer
     if (gameState.currentPlayer !== actionData.playerIndex) return;
 
     // Add an action to the game state action stream. This action will be shared to all players.
