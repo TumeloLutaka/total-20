@@ -1,0 +1,181 @@
+<!--
+SYSTEM GOAL
+-----------
+One physical card.
+Two faces:
+- Front: number
+- Back: pattern
+Only the face pointing toward the camera is visible.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Card Front / Back System</title>
+
+    <style>
+      body {
+        background-color: #ccc;
+      }
+      /*
+==================================================
+1. SCENE (CAMERA)
+==================================================
+
+Mental model:
+- Same as before
+- Defines how depth is projected
+*/
+      .scene {
+        perspective: 1000px;
+        width: 300px;
+        height: 220px;
+        margin: 60px auto;
+        display: grid;
+        place-items: center;
+      }
+
+      /*
+==================================================
+2. CARD (3D CONTAINER)
+==================================================
+
+Mental model:
+- The card itself does NOT show visuals
+- It is a 3D container holding two faces
+*/
+      .card {
+        width: 120px;
+        height: 180px;
+        position: relative;
+
+        /*
+  preserve-3d:
+  - without this, front/back collapse into 2D
+  */
+        transform-style: preserve-3d;
+
+        /*
+  initial orientation:
+  - front face looking at camera
+  */
+        transform: rotateY(0deg);
+
+        transition: transform 0.8s ease;
+      }
+
+      /*
+==================================================
+3. CARD FACE (SHARED RULES)
+==================================================
+
+Mental model:
+- Both faces occupy the same space
+- Visibility depends on facing direction
+*/
+      .face {
+        position: absolute;
+        inset: 0;
+
+        display: grid;
+        place-items: center;
+        font-size: 2rem;
+        font-weight: bold;
+
+        /*
+  CRITICAL RULE:
+  - when a face points away from camera,
+    it must disappear
+  */
+        backface-visibility: hidden;
+
+        border-radius: 8px;
+      }
+
+      /*
+==================================================
+4. FRONT FACE
+==================================================
+
+Mental model:
+- Front faces camera at 0deg
+- No rotation needed
+*/
+      .front {
+        background: white;
+        color: black;
+      }
+
+      /*
+==================================================
+5. BACK FACE
+==================================================
+
+Mental model:
+- Back face is physically rotated
+- So when the card flips, it becomes visible
+*/
+      .back {
+        background: repeating-linear-gradient(
+          45deg,
+          crimson,
+          crimson 10px,
+          darkred 10px,
+          darkred 20px
+        );
+
+        /*
+  rotateY(180deg):
+  - places the back face behind the front
+  - facing opposite direction
+  */
+        transform: rotateY(180deg);
+      }
+
+      /*
+==================================================
+6. FLIPPED STATE
+==================================================
+
+Mental model:
+- We rotate the whole card
+- NOT the individual faces
+*/
+      .card.flipped {
+        transform: rotateY(180deg);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="scene">
+      <div class="card" id="card">
+        <!-- Front face -->
+        <div class="face front">7</div>
+
+        <!-- Back face -->
+        <div class="face back"></div>
+      </div>
+    </div>
+
+    <button onclick="flipCard()">Flip Card</button>
+
+    <script>
+      /*
+==================================================
+7. STATE CHANGE (CONTROL LOGIC)
+==================================================
+
+Mental model:
+- Faces do not toggle
+- Orientation toggles
+- Visibility is automatic
+*/
+
+      function flipCard() {
+        document.getElementById("card").classList.toggle("flipped");
+      }
+    </script>
+  </body>
+</html>

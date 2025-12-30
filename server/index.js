@@ -13,7 +13,6 @@ import flash from "express-flash";
 import session from "express-session";
 import methodOverride from "method-override";
 
-
 import { socketHandler } from "./src/socket.js";
 import gameManager from "./src/GameManager.js";
 
@@ -31,6 +30,10 @@ initializePassport(
   (id) => users.find((user) => user.id === id)
 );
 
+// Setting middleware
+app.set("view-engine", "ejs");
+app.set("views", join(__dirname, "views"));
+
 app.use(express.static(join(__dirname, "../client")));
 app.use(express.urlencoded({ extended: false }));
 app.use(flash());
@@ -45,14 +48,30 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(methodOverride("_method"));
 
+// ========== GET CALLS ========== \\
 app.get("/", checkAuthenticated, (req, res) => {
-  res.sendFile(join(__dirname, "../client/"));
+  res.render("home.ejs", { name: req.user.username});
+  // res.sendFile(join(__dirname, "../client/"));
+});
+
+app.get("/game/:roomId", checkNotAuthenticated, (req, res) => {
+  res.sendFile(join(__dirname, "../client/game.html"));
+});
+
+app.get("/game-test", checkNotAuthenticated, (req, res) => {
+  res.sendFile(join(__dirname, "../client/game-test.html"));
 });
 
 app.get("/login", checkNotAuthenticated, (req, res) => {
-  res.sendFile(join(__dirname, "../client/login.html"));
+  res.render("login.ejs");
 });
 
+app.get("/register", checkNotAuthenticated, (req, res) => {
+  res.sendFile(join(__dirname, "../client/register.html"));
+});
+
+
+// ========== POST ========== \\
 app.post(
   "/login",
   checkNotAuthenticated,
@@ -63,9 +82,6 @@ app.post(
   })
 );
 
-app.get("/register", checkNotAuthenticated, (req, res) => {
-  res.sendFile(join(__dirname, "../client/register.html"));
-});
 
 app.post("/register", checkNotAuthenticated, async (req, res) => {
   try {
@@ -80,26 +96,24 @@ app.post("/register", checkNotAuthenticated, async (req, res) => {
   } catch (error) {
     res.redirect("/register");
   }
- 
+
   console.log(users);
 });
 
-app.get("/game/:roomId", checkNotAuthenticated, (req, res) => {
-  res.sendFile(join(__dirname, "../client/game.html"));
-});
 
+
+// ========== DELETE CALLS ========== \\
 app.delete("/logout", (req, res) => {
-  app.get('/logout', (req, res, next) => {
-  req.logout((err) => {
-    if (err) { 
-      return next(err); 
-    }
-    res.redirect('/');
+  app.get("/logout", (req, res, next) => {
+    req.logout((err) => {
+      if (err) {
+        return next(err);
+      }
+      res.redirect("/");
+    });
   });
+  res.redirect("/login");
 });
-  res.redirect('/login')
- });
-
 
 socketHandler(io, gameManager);
 

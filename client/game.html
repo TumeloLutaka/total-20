@@ -1,41 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Total Twenty</title>
-    <link rel="stylesheet" href="/css/main.css">
-</head>
-<body>
-    <h1>Total Twenty Game Screen</h1>
+    <link rel="stylesheet" href="/css/main.css" />
+  </head>
+  <body class="linear-bg">
+    <div class="glass">
+      <h1>Total Twenty</h1>
 
-    <h2>GAME STATUS: <span id="game_status"></span></h2> 
-    <h2>ROUND: <span id="round_info"></span> PLAYER <span id="player_turn_info"></span>'S TURN</h2>
-    
-    <button id="btn-stand_user">Stand</button>
-    <button id="btn-end_turn">End turn</button>
+      <h2>GAME STATUS: <span id="game_status"></span></h2>
+      <h2>
+        ROUND: <span id="round_info"></span> PLAYER
+        <span id="player_turn_info"></span>'S TURN
+      </h2>
 
-    <div id="opponent_hand-wrapper">
-        <div class="card">This is a card 1:1.4</div>
+      <h3>SCORES:</h3>
+      <p>
+        Player 1| <span id="player_score_1"></span> |
+        <span id="player_score_2"></span> |Player 2
+      </p>
+      <p>
+        Player 1| <span id="player_1_points"></span> ||
+        <span id="player_2_points"></span> |Player 2
+      </p>
+
+      <div class="game-board">
+        <section class="opponent-hand">
+          <div class="card-outer">
+            <div class="card-inner">
+              <div class="card-front">7</div>
+              <div class="card-back"></div>
+            </div>
+          </div>
+        </section>
+
+        <div class="play-pile p1">
+          <card class="bot-card">P1</card>
+          <div class="points-holder">0</div>
+        </div>
+        <div class="draw-deck">
+          <div class="card-outer">
+            <div class="card-inner">
+              <div class="card-front">7</div>
+              <div class="card-back"></div>
+            </div>
+          </div>
+        </div>
+        <div class="play-pile p2">
+          <card class="bot-card">P2</card>
+          <div class="points-holder">0</div>
+        </div>
+
+        <section class="player-hand">
+          <div class="card-outer">
+            <div class="card-inner card-player">
+              <div class="card-front">7</div>
+              <div class="card-back"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <button class="glass-button" id="btn-stand_user">Stand</button>
+      <button class="glass-button" id="btn-end_turn">End turn</button>
+
+      <h3>
+        <span id="player_info"></span> | HAS STOOD:<span
+          id="player_stood"
+        ></span>
+      </h3>
     </div>
-    
-    <div id="draw_deck-wrapper">
-        <div class="card" id="draw_deck-card">This is a card 1:1.4</div>
-    </div>
 
-    <div id="hand-wrapper">
-        <div class="card">This is a card 1:1.4</div>
-    </div>
-
-    <h3><span id="player_info"></span> | HAS STOOD:<span id="player_stood"></span> </h3>
-    <h3>SCORES:</h3>
-    <p>Player 1| <span id="player_score_1"></span> | <span id="player_score_2"></span> |Player 2</p>
-    <p>Player 1 Last Card| <span id="player_last_card_1"></span> | <span id="draw_last_card"></span> | <span id="player_last_card_2"></span> |Player 2 Last Card</p>
-
-    <h4>POINTS:</h4>
-    <p>Player 1| <span id="player_1_points"></span> || <span id="player_2_points"></span> |Player 2</p>
-
-    <script src="/socket.io/socket.io.js"></script>
-    <script type="module" src="/javascript/game.js"></script>
-</body>
+    <!-- <script src="/socket.io/socket.io.js"></script> -->
+    <script type="module" src="/javascript/animation.js"></script>
+  </body>
 </html>
