@@ -13,18 +13,18 @@ class GameManager {
       round: 1,
       status: "waiting",
       actionStream: [],
-      addPlayer(username, socketId) {
+      addPlayer(username, userId, socketId) {
         this.players.push({
-          id: username,
-          socketId,
+          id: userId,
           hand: GenerateHand(),
           hasDrawn: false,
           hasPlayed: false,
           hasStood: false,
           points: 0,
-          score: 0,
-          tag: "Player " + (this.players.length + 1),
           position: this.players.length,
+          score: 0,
+          socketId,
+          username,
         });
       },
     });

@@ -55,7 +55,7 @@ function gameHandler(io, socket, gameManager) {
     socket.join(userData.roomId);
 
     const gameState = gameManager.getGame(userData.roomId);
-    gameState.addPlayer(userData.username, socket.id);
+    gameState.addPlayer(userData.username, userData.userId, socket.id);
 
     // Find game related to room
     if (gameState.players.length === 2) {
@@ -69,17 +69,22 @@ function gameHandler(io, socket, gameManager) {
   });
 
   socket.on(SocketEvents.C2S.ACTION_STREAM, (actionData) => {
-    // Get game state associated with room
     const gameState = gameManager.getGame(actionData.roomId);
+    if (!gameState || gameState.status === "Game Over") return;
 
-    // Don't process any actions if the game is done.
-    if (gameState.status === "Game Over") return;
+    // SECURE: Get ID directly from the authenticated session
+    const authenticatedUserId = actionData.userId; // TODO: delete this and figure out how to get the passport ID from passport.js
+    // const authenticatedUserId = socket.request.user.id;
 
-    // Check if the player making the call is on their turn
-    // TODO Change the validation of currentPlayer
-    if (gameState.currentPlayer !== actionData.playerIndex) return;
+    // Find the player in the game using the Passport ID
+    const caller = gameState.players.find((p) => p.id === authenticatedUserId);
 
-    // Add an action to the game state action stream. This action will be shared to all players.
+    if (!caller) return;
+
+    const callerIndex = gameState.players.indexOf(caller);
+    if (gameState.currentPlayer !== callerIndex) return;
+
+    // Success - Process action
     gameState.actionStream.push(actionData);
     parseActionStream(io, gameState);
   });
@@ -91,7 +96,7 @@ function parseActionStream(io, gameState) {
   const actionData = gameState.actionStream[gameState.actionStream.length - 1];
   if (!actionData) return; // Exit if the stream is empty
 
-  const activePlayer = gameState.players[actionData.playerIndex];
+  const activePlayer = gameState.players[gameState.currentPlayer];
 
   let sendGameState = true;
 
@@ -110,16 +115,12 @@ function parseActionStream(io, gameState) {
       // Check who called the add functionality to determine where the top card will change
       if (actionData.caller === "server") {
         // Set the gameboard top card to newly drawn card
-        gameState.gameBoard.topCard = activeCard.number;
       } else if (actionData.caller === "player") {
-        // Set the player top card to newly drawn card
-        activePlayer.topCard = activeCard.number;
-
         // Filter out the drawn card from the player's hand.
         activePlayer.hand = activePlayer.hand.filter((card, index) => {
           return index !== actionData.cardIndex;
         });
-      }
+      } 
 
       // Auto stand player if they hit 20
       if (activePlayer.score === 20) {

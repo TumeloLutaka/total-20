@@ -164,27 +164,15 @@ function moveAndFlipOpponentCard(cardOuter, targetPile) {
   }, 700); // matches flip duration
 
   // 6. Cleanup
-  cardOuter.addEventListener(
-    "transitionend",
-    (e) => {
-      // Ignore transitions from children (like card-inner flip)
-      if (e.target !== cardOuter) return;
+  setTimeout(() => {
+    cardOuter.style.transition = "";
+    cardOuter.style.transform = "";
+    cardOuter.style.position = "";
+    cardOuter.style.left = "";
+    cardOuter.style.top = "";
+    cardOuter.style.zIndex = "";
 
-      // Ignore non-transform transitions (future-proofing)
-      if (e.propertyName !== "transform") return;
-
-      cardOuter.style.transition = "";
-      cardOuter.style.transform = "";
-      cardOuter.style.position = "";
-      cardOuter.style.left = "";
-      cardOuter.style.top = "";
-      cardOuter.style.zIndex = "";
-
-      // **Clear all existing children in the pile**
-      targetPile.innerHTML = ""; // simple and effective
-
-      targetPile.appendChild(cardOuter);
-    },
-    { once: true }
-  );
+    targetPile.innerHTML = "";
+    targetPile.appendChild(cardOuter);
+  }, 1400); // flip (0.6s) + move (0.6s) + buffer
 }

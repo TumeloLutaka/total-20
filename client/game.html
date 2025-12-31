@@ -5,71 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Total Twenty</title>
     <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="/css/animation.css" />
   </head>
   <body class="linear-bg">
-    <div class="glass">
-      <h1>Total Twenty</h1>
-
-      <h2>GAME STATUS: <span id="game_status"></span></h2>
-      <h2>
-        ROUND: <span id="round_info"></span> PLAYER
-        <span id="player_turn_info"></span>'S TURN
-      </h2>
-
-      <h3>SCORES:</h3>
-      <p>
-        Player 1| <span id="player_score_1"></span> |
-        <span id="player_score_2"></span> |Player 2
-      </p>
-      <p>
-        Player 1| <span id="player_1_points"></span> ||
-        <span id="player_2_points"></span> |Player 2
-      </p>
-
-      <p>
-        <span id="player_info"></span> | HAS STOOD:<span
-          id="player_stood"
-        ></span>
-      </p>
-
-      <div class="game-board">
-        <section class="opponent-hand">
-          <div class="card-outer">
-            <div class="card-inner">
-              <div class="card-front">7</div>
-              <div class="card-back"></div>
-            </div>
-          </div>
-        </section>
-
-        <div class="play-pile p1"><card class="bot-card">P1</card></div>
-        <div class="points-holder ph1">0</div>
-        <div class="draw-deck">
-          <div class="card-outer">
-            <div class="card-inner">
-              <div class="card-front">7</div>
-              <div class="card-back"></div>
-            </div>
-          </div>
-        </div>
-        <div class="play-pile p2"><card class="bot-card">P2</card></div>
-        <div class="points-holder ph2">0</div>
-
-        <section class="player-hand">
-          <div class="card-outer">
-            <div class="card-inner card-player">
-              <div class="card-front">7</div>
-              <div class="card-back"></div>
-            </div>
-          </div>
-        </section>
+    <div class="game-view">
+      <div class="player-hud-card p1-card">
+        <div class="hud-label">PLAYER 1</div>
+        <div class="player-display-name" id="p1_name">Loading...</div>
+        <div class="hud-points" id="player_points_1">0</div>
+        <div class="hud-status" id="p1_stood">ACTIVE</div>
       </div>
 
-      <button class="glass-button" id="btn-stand_user">Stand</button>
-      <button class="glass-button" id="btn-end_turn">End turn</button>
+      <div class="game-info-center">
+        <div id="game_status" class="phase-tag">PLAYING PHASE</div>
+        <div class="round-display">ROUND <span id="round_info">0</span></div>
+        <div class="turn-display">
+          PLAYER <span id="player_turn_info">1</span>'S TURN
+        </div>
+      </div>
+
+      <div class="player-hud-card p2-card">
+        <div class="hud-label">PLAYER 2</div>
+        <div class="player-display-name" id="p2_name">Loading...</div>
+        <div class="hud-points" id="player_points_2">0</div>
+        <div class="hud-status" id="p2_stood">ACTIVE</div>
+      </div>
+
+      <div class="glass">
+        <div class="game-board">
+          <h1 class="game-title">Total Twenty</h1>
+
+          <section class="opponent-hand">
+            <div class="card-outer">
+              <div class="card-inner">
+                <div class="card-front">7</div>
+                <div class="card-back"></div>
+              </div>
+            </div>
+          </section>
+
+          <div class="play-pile p1"><card class="bot-card">P1</card></div>
+          <div class="score-holder sh1" id="score_holder_1">0</div>
+
+          <div class="draw-deck">
+            <div class="card-outer">
+              <div class="card-inner">
+                <div class="card-front">7</div>
+                <div class="card-back"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="play-pile p2"><card class="bot-card">P2</card></div>
+          <div class="score-holder sh2" id="score_holder_2">0</div>
+
+          <section class="player-hand">
+            <div class="card-outer">
+              <div class="card-inner card-player">
+                <div class="card-front">7</div>
+                <div class="card-back"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div class="button-container">
+        <button class="btn-glass" id="btn-draw_card">Draw</button>
+        <button class="btn-glass" id="btn-stand_user">Stand</button>
+        <button class="btn-glass" id="btn-end_turn">End turn</button>
+      </div>
     </div>
 
-    <!-- <script src="/socket.io/socket.io.js"></script> -->
-    <script type="module" src="/javascript/animation.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="/javascript/main.js"></script>
   </body>
 </html>
