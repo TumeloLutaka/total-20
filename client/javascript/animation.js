@@ -1,68 +1,54 @@
-const handCards = document.querySelectorAll(".player-hand .card-outer");
-const opponentCards = document.querySelectorAll(".opponent-hand .card-outer");
-const drawDeckCard = document.querySelector(".draw-deck .card-outer");
-const pile1 = document.querySelector(".p1");
-const pile2 = document.querySelector(".p2");
+export function moveCard(card, targetPile) {
+  return new Promise((resolve) => {
+    const target = targetPile;
+    console.log(target);
 
-handCards.forEach((card) => {
-  card.addEventListener("click", () => moveCard(card, pile1));
-});
+    const cardRect = card.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
 
-opponentCards.forEach((card) => {
-  card.addEventListener("click", () => moveAndFlipOpponentCard(card, pile2));
-});
+    card.style.position = "fixed";
+    card.style.left = `${cardRect.left}px`;
+    card.style.top = `${cardRect.top}px`;
+    card.style.margin = "0";
+    card.style.zIndex = "1000";
 
-drawDeckCard.addEventListener("click", () => {
-  moveAndFlipCard(drawDeckCard, pile1);
-});
+    document.body.appendChild(card);
 
-function moveCard(card, targetPile) {
-  const target = targetPile;
-  console.log(target);
+    const deltaX =
+      targetRect.left +
+      targetRect.width / 2 -
+      (cardRect.left + cardRect.width / 2);
 
-  const cardRect = card.getBoundingClientRect();
-  const targetRect = target.getBoundingClientRect();
+    const deltaY =
+      targetRect.top +
+      targetRect.height / 2 -
+      (cardRect.top + cardRect.height / 2);
 
-  card.style.position = "fixed";
-  card.style.left = `${cardRect.left}px`;
-  card.style.top = `${cardRect.top}px`;
-  card.style.margin = "0";
-  card.style.zIndex = "1000";
+    requestAnimationFrame(() => {
+      card.style.transition = "transform 0.6s ease";
+      card.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+    });
 
-  document.body.appendChild(card);
+    card.addEventListener(
+      "transitionend",
+      () => {
+        card.style.transition = "";
+        card.style.transform = "";
+        card.style.position = "";
+        card.style.left = "";
+        card.style.top = "";
+        card.style.zIndex = "";
 
-  const deltaX =
-    targetRect.left +
-    targetRect.width / 2 -
-    (cardRect.left + cardRect.width / 2);
+        // **Clear all existing children in the pile**
+        targetPile.innerHTML = ""; // simple and effective
 
-  const deltaY =
-    targetRect.top +
-    targetRect.height / 2 -
-    (cardRect.top + cardRect.height / 2);
+        targetPile.appendChild(card);
 
-  requestAnimationFrame(() => {
-    card.style.transition = "transform 0.6s ease";
-    card.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+        resolve();
+      },
+      { once: true }
+    );
   });
-
-  card.addEventListener(
-    "transitionend",
-    () => {
-      card.style.transition = "";
-      card.style.transform = "";
-      card.style.position = "";
-      card.style.left = "";
-      card.style.top = "";
-      card.style.zIndex = "";
-
-      // **Clear all existing children in the pile**
-      targetPile.innerHTML = ""; // simple and effective
-
-      targetPile.appendChild(card);
-    },
-    { once: true }
-  );
 }
 
 function moveAndFlipCard(cardOuter, targetPile) {

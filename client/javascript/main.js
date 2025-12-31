@@ -1,4 +1,4 @@
 import { initializeSocketHandler } from "./socketHandler.js";
-import { handleActionStream } from "./actionHandler.js";
+import { handleActionStreamData } from "./actionHandler.js";
 
-initializeSocketHandler(handleActionStream);
+initializeSocketHandler(handleActionStreamData);

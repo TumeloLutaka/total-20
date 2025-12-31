@@ -1,4 +1,4 @@
-import { setPlaybackSteamData } from "./playbackHandler.js";
+import { setPlaybackStreamData } from "./playbackHandler.js";
 
 export function handleActionStreamData(gameState) {
   const actionStream = gameState.actionStream;
@@ -16,5 +16,5 @@ export function handleActionStreamData(gameState) {
     }
   }
 
-  setPlaybackSteamData(playbackStreamData);
+  setPlaybackStreamData(playbackStreamData, gameState);
 }

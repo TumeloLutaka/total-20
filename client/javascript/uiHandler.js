@@ -1,5 +1,7 @@
 // Get intent handler function
 import * as IntentHandler from "./intentHandler.js";
+import { markPlaybackStepComplete } from "./playbackHandler.js";
+import * as Animations from "./animation.js";
 
 // ========== BUTTONS TO BE DELETED ========== \\
 const btnDrawCard = document.getElementById("btn-draw_card");
@@ -53,6 +55,8 @@ export function initializeUI(gameState) {
 
   renderHand(player.hand);
   renderOpponentHand();
+
+  markPlaybackStepComplete();
 }
 
 // ========== EVENT LISTENERS ========== \\
@@ -73,7 +77,7 @@ btnStandUser.addEventListener("click", () => {
   });
 });
 
-// ==================== FUNCTIONS ==================== \\
+// ==================== PRIVATE  FUNCTIONS ==================== \\
 function createCard(value, type, owner = "") {
   const cardContainer = document.createElement("div");
   cardContainer.className = "card-outer";
@@ -125,4 +129,20 @@ function renderOpponentHand() {
 
   // 4. Append the fragment to the live list (only 1 reflow happens here!)
   opponentHand.appendChild(fragment);
+}
+
+function updateScore(value) {
+  scoreHolder1.textContent = players[0].score;
+}
+
+// ==================== PUBLIC FUNCTIONS ==================== \\
+export async function draw_card() {
+  // Get the first card in the player's hand
+  const card = playerHand.children[0]; // or select by class: playerHand.querySelector(".card-outer")
+
+  // Await the animation to finish
+  await Animations.moveCard(card, pile1);
+
+  // Continue with post-animation logic
+  updatePoints();
 }
