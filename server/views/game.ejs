@@ -17,7 +17,7 @@
       </div>
 
       <div class="game-info-center">
-        <div id="game_status" class="phase-tag">PLAYING PHASE</div>
+        <div id="game_status" class="phase-tag">Loading...</div>
         <div class="round-display">ROUND <span id="round_info">0</span></div>
         <div class="turn-display">
           PLAYER <span id="player_turn_info">1</span>'S TURN
@@ -54,6 +54,12 @@
                 <div class="card-back"></div>
               </div>
             </div>
+            <div class="card-outer">
+              <div class="card-inner">
+                <div class="card-front">7</div>
+                <div class="card-back"></div>
+              </div>
+            </div>
           </div>
 
           <div class="play-pile p2"><card class="bot-card">P2</card></div>
@@ -74,6 +80,28 @@
         <button class="btn-glass" id="btn-draw_card">Draw</button>
         <button class="btn-glass" id="btn-stand_user">Stand</button>
         <button class="btn-glass" id="btn-end_turn">End turn</button>
+      </div>
+    </div>
+
+    <div class="game-over-overlay hidden">
+      <div class="game-over-modal">
+        <div class="game-over-title-container">
+          <h2 class="game-over-text">MATCH OVER</h2>
+        </div>
+        <div class="game-over-results">
+          <p id="winner-announcement">Player 1 Wins!</p>
+          <p>
+            <span id="final-scores-1">Player 1</span>
+            <span id="final-scores">5 - 3</span>
+            <span id="final-scores-2">Player 2</span>
+          </p>
+        </div>
+        <div class="game-over-actions">
+          <button class="btn-glass btn-primary" id="btn-play-again">
+            Play Again
+          </button>
+          <button class="btn-glass" id="btn-home">Home</button>
+        </div>
       </div>
     </div>
 

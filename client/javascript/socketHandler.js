@@ -12,15 +12,13 @@ export function initializeSocketHandler(handleActionStream) {
     // Let server know we are connected and want the gameState data
     socket.emit(SocketEvents.C2S.GET_GAME, {
       roomId,
-      username: sessionStorage.getItem("username"),
-      userId: socket.id, // TODO: replace this with passport id.
     });
   });
 
   socket.on(SocketEvents.S2C.SEND_GAME_STATE, (_GameState) => {
     const gameState = _GameState;
 
-    handleActionStream(gameState);
+    handleActionStream(gameState); 
   });
 
   // Call server let it know player has loaded into the game and get initial game state.
@@ -29,10 +27,8 @@ export function initializeSocketHandler(handleActionStream) {
 export function sendIntent(overrides) {
   const actionStreamData = {
     roomId,
-    username: sessionStorage.getItem("username"), // TODO: Add userId from passport.js
-    userId: socket.id, // TODO: replace this with passport id.
     ...overrides,
   };
 
-  socket.emit(SocketEvents.C2S.ACTION_STREAM, actionStreamData); 
+  socket.emit(SocketEvents.C2S.ACTION_STREAM, actionStreamData);
 }

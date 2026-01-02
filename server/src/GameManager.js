@@ -1,4 +1,5 @@
 import { Socket } from "socket.io";
+import { ActionPhases } from "../../client/shared/actionPhases.js";
 
 // gameManager.js
 class GameManager {
@@ -8,11 +9,12 @@ class GameManager {
 
   createGame(roomName) {
     this.games.set(roomName, {
-      players: [],
-      currentPlayer: 0,
-      round: 1,
-      status: "waiting",
       actionStream: [],
+      currentPlayerIndex: 0,
+      isProcessing: false,
+      players: [],
+      round: 1,
+      status: ActionPhases.WAITING_PHASE,
       addPlayer(username, userId, socketId) {
         this.players.push({
           id: userId,

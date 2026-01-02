@@ -1,7 +1,7 @@
 export function moveCard(card, targetPile) {
   return new Promise((resolve) => {
-    const target = targetPile;
-    console.log(target);
+    console.log(targetPile);
+    const target = targetPile.children[0];
 
     const cardRect = card.getBoundingClientRect();
     const targetRect = target.getBoundingClientRect();
@@ -29,73 +29,59 @@ export function moveCard(card, targetPile) {
       card.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
     });
 
-    card.addEventListener(
-      "transitionend",
-      () => {
-        card.style.transition = "";
-        card.style.transform = "";
-        card.style.position = "";
-        card.style.left = "";
-        card.style.top = "";
-        card.style.zIndex = "";
+    setTimeout(() => {
+      card.style.transition = "";
+      card.style.transform = "";
+      card.style.position = "";
+      card.style.left = "";
+      card.style.top = "";
+      card.style.zIndex = "";
 
-        // **Clear all existing children in the pile**
-        targetPile.innerHTML = ""; // simple and effective
+      targetPile.innerHTML = "";
+      targetPile.appendChild(card);
 
-        targetPile.appendChild(card);
-
-        resolve();
-      },
-      { once: true }
-    );
+      resolve();
+    }, 650); // 600ms animation + 50ms buffer
   });
 }
 
-function moveAndFlipCard(cardOuter, targetPile) {
-  const target = targetPile.firstChild;
-  console.log(targetPile);
-  const cardInner = cardOuter.querySelector(".card-inner");
+export function moveAndFlipCard(cardOuter, targetPile) {
+  return new Promise((resolve) => {
+    const target = targetPile.firstChild;
+    const cardInner = cardOuter.querySelector(".card-inner");
 
-  // 1. Capture current bounding rect
-  const cardRect = cardOuter.getBoundingClientRect();
-  const pileRect = target.getBoundingClientRect();
+    // 1. Capture current bounding rect
+    const cardRect = cardOuter.getBoundingClientRect();
+    const pileRect = target.getBoundingClientRect();
 
-  // 2. Detach & freeze position in viewport
-  cardOuter.style.position = "fixed";
-  cardOuter.style.left = `${cardRect.left}px`;
-  cardOuter.style.top = `${cardRect.top}px`;
-  cardOuter.style.margin = "0";
-  cardOuter.style.zIndex = "1000";
+    // 2. Detach & freeze position in viewport
+    cardOuter.style.position = "fixed";
+    cardOuter.style.left = `${cardRect.left}px`;
+    cardOuter.style.top = `${cardRect.top}px`;
+    cardOuter.style.margin = "0";
+    cardOuter.style.zIndex = "1000";
 
-  document.body.appendChild(cardOuter);
+    document.body.appendChild(cardOuter);
 
-  // 3. Calculate translation
-  const deltaX =
-    pileRect.left + pileRect.width / 2 - (cardRect.left + cardRect.width / 2);
-  const deltaY =
-    pileRect.top + pileRect.height / 2 - (cardRect.top + cardRect.height / 2);
+    // 3. Calculate translation
+    const deltaX =
+      pileRect.left + pileRect.width / 2 - (cardRect.left + cardRect.width / 2);
+    const deltaY =
+      pileRect.top + pileRect.height / 2 - (cardRect.top + cardRect.height / 2);
 
-  // 4. Animate translation
-  requestAnimationFrame(() => {
-    cardOuter.style.transition = "transform 0.6s ease";
-    cardOuter.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+    // 4. Animate translation
+    requestAnimationFrame(() => {
+      cardOuter.style.transition = "transform 0.6s ease";
+      cardOuter.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
 
-    // 5. Trigger mid-flight flip at 50% of travel
+      // 5. Trigger mid-flight flip at 50% of travel
+      setTimeout(() => {
+        cardInner.style.transform = "rotateY(180deg)";
+      }, 300); // 0.6s total / 2
+    });
+
+    // 6. Cleanup after animation completes
     setTimeout(() => {
-      cardInner.style.transform = "rotateY(180deg)";
-    }, 300); // 0.6s total / 2
-  });
-
-  // 6. Cleanup after movement
-  cardOuter.addEventListener(
-    "transitionend",
-    (e) => {
-      // Ignore transitions from children (like card-inner flip)
-      if (e.target !== cardOuter) return;
-
-      // Ignore non-transform transitions (future-proofing)
-      if (e.propertyName !== "transform") return;
-
       cardOuter.style.transition = "";
       cardOuter.style.transform = "";
       cardOuter.style.position = "";
@@ -103,62 +89,64 @@ function moveAndFlipCard(cardOuter, targetPile) {
       cardOuter.style.top = "";
       cardOuter.style.zIndex = "";
 
-      // **Clear all existing children in the pile**
-      targetPile.innerHTML = ""; // simple and effective
-
+      targetPile.innerHTML = "";
       targetPile.appendChild(cardOuter);
-    },
-    { once: true }
-  );
+
+      resolve();
+    }, 650); // 600ms animation + 50ms buffer
+  });
 }
 
-function moveAndFlipOpponentCard(cardOuter, targetPile) {
-  // Get the current child in the pile and set that as the target
-  const target = targetPile.firstChild;
+export function moveAndFlipOpponentCard(cardOuter, targetPile) {
+  return new Promise((resolve) => {
+    // Get the current child in the pile and set that as the target
+    const target = targetPile.firstChild;
+    const cardInner = cardOuter.querySelector(".card-inner");
 
-  const cardInner = cardOuter.querySelector(".card-inner");
+    // 1. Capture bounding rects
+    const cardRect = cardOuter.getBoundingClientRect();
+    const pileRect = target.getBoundingClientRect();
 
-  // 1. Capture bounding rects
-  const cardRect = cardOuter.getBoundingClientRect();
-  const pileRect = target.getBoundingClientRect();
+    // 2. Detach & freeze
+    cardOuter.style.position = "fixed";
+    cardOuter.style.left = `${cardRect.left}px`;
+    cardOuter.style.top = `${cardRect.top}px`;
+    cardOuter.style.margin = "0";
+    cardOuter.style.zIndex = "1000";
 
-  // 2. Detach & freeze
-  cardOuter.style.position = "fixed";
-  cardOuter.style.left = `${cardRect.left}px`;
-  cardOuter.style.top = `${cardRect.top}px`;
-  cardOuter.style.margin = "0";
-  cardOuter.style.zIndex = "1000";
+    document.body.appendChild(cardOuter);
 
-  document.body.appendChild(cardOuter);
+    // 3. Flip immediately (but force frame)
+    requestAnimationFrame(() => {
+      cardInner.style.transition = "transform 0.6s ease";
+      cardInner.style.transform = "rotateY(180deg)";
+    });
 
-  // 3. Flip immediately (but force frame)
-  requestAnimationFrame(() => {
-    cardInner.style.transition = "transform 0.6s ease";
-    cardInner.style.transform = "rotateY(180deg)";
+    // 4. Calculate translation
+    const deltaX =
+      pileRect.left + pileRect.width / 2 - (cardRect.left + cardRect.width / 2);
+    const deltaY =
+      pileRect.top + pileRect.height / 2 - (cardRect.top + cardRect.height / 2);
+
+    // 5. Animate movement after flip completes
+    setTimeout(() => {
+      cardOuter.style.transition = "transform 0.6s ease";
+      cardOuter.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+    }, 700); // matches flip duration + buffer
+
+    // 6. Cleanup after all animations complete
+    setTimeout(() => {
+      cardOuter.style.transition = "";
+      cardOuter.style.transform = "";
+      cardOuter.style.position = "";
+      cardOuter.style.left = "";
+      cardOuter.style.top = "";
+      cardOuter.style.zIndex = "";
+
+      targetPile.innerHTML = "";
+      targetPile.appendChild(cardOuter);
+
+      resolve();
+    }, 1400); // flip (600ms) + delay (100ms) + move (600ms) + buffer (100ms)
   });
-
-  // 4. Calculate translation
-  const deltaX =
-    pileRect.left + pileRect.width / 2 - (cardRect.left + cardRect.width / 2);
-  const deltaY =
-    pileRect.top + pileRect.height / 2 - (cardRect.top + cardRect.height / 2);
-
-  // 5. Animate movement after flip completes
-  setTimeout(() => {
-    cardOuter.style.transition = "transform 0.6s ease";
-    cardOuter.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-  }, 700); // matches flip duration
-
-  // 6. Cleanup
-  setTimeout(() => {
-    cardOuter.style.transition = "";
-    cardOuter.style.transform = "";
-    cardOuter.style.position = "";
-    cardOuter.style.left = "";
-    cardOuter.style.top = "";
-    cardOuter.style.zIndex = "";
-
-    targetPile.innerHTML = "";
-    targetPile.appendChild(cardOuter);
-  }, 1400); // flip (0.6s) + move (0.6s) + buffer
 }
