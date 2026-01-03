@@ -112,6 +112,14 @@ app.get("/", (req, res) => {
   res.render("login.ejs", { error: req.flash("error") });
 });
 
+app.get("/login", (req, res) => {
+  if (req.isAuthenticated()) {
+    return res.render("home.ejs", { user: req.user });
+  }
+
+  res.render("login.ejs", { error: req.flash("error") });
+});
+
 app.get("/game/:roomId", (req, res) => {
   res.render("game.ejs");
 });
@@ -125,17 +133,27 @@ app.post(
   })
 );
 
-app.delete("/logout", (req, res) => {
+app.delete("/logout", (req, res, next) => {
   const userId = req.user?.id;
-  req.logout((err) => {
-    if (userId) {
-      const index = users.findIndex((user) => user.id === userId);
-      if (index !== -1) {
-        users.splice(index, 1);
-      }
 
-      res.redirect("/login.ejs");
+  // 1. Remove user from your "database" array
+  if (userId) {
+    const index = users.findIndex((user) => user.id === userId);
+    if (index !== -1) {
+      users.splice(index, 1);
     }
+  }
+
+  // 2. Passport logout (clears req.user)
+  req.logout((err) => {
+    if (err) return next(err);
+
+    // 3. Destroy session and redirect
+    req.session.destroy((err) => {
+      if (err) return next(err);
+      res.clearCookie("connect.sid"); // Matches your session cookie name
+      res.redirect("/"); // Send them back to the login/home logic
+    });
   });
 });
 
