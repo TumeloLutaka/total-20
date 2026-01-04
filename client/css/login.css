@@ -23,7 +23,19 @@ body {
   border-right: 1px solid rgba(255, 255, 255, 0.2);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 10px;
+  animation: animate 10s linear infinite;
+  animation-delay: calc(-1s * var(--i));
 }
+@keyframes animate {
+  0%,
+  100% {
+    transform: translateY(-40px);
+  }
+  50% {
+    transform: translateY(40px);
+  }
+}
+
 .box .square:nth-child(1) {
   top: -50px;
   right: -60px;
@@ -35,7 +47,26 @@ body {
   left: -100px;
   width: 120px;
   height: 120px;
-  z-index: -2;
+  z-index: 2;
+}
+.box .square:nth-child(3) {
+  bottom: 50px;
+  right: -60px;
+  width: 80px;
+  height: 80px;
+  z-index: 2;
+}
+.box .square:nth-child(4) {
+  bottom: -80px;
+  left: 100px;
+  width: 50px;
+  height: 50px;
+}
+.box .square:nth-child(5) {
+  top: -50px;
+  left: 140px;
+  width: 60px;
+  height: 60px;
 }
 
 .container__login-form {
@@ -78,39 +109,6 @@ body {
   background: white;
 }
 
-.input-box {
-  width: 100%;
-  margin-top: 20px;
-}
-
-.input-box input {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  outline: none;
-  padding: 10px 20px;
-  border-radius: 35px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  font-size: 16px;
-  letter-spacing: 1px;
-  color: white;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-}
-.input-box input::placeholder {
-  color: white;
-}
-
-.input-box input[type="submit"] {
-  background: white;
-  color: #666;
-  max-width: 100px;
-  cursor: pointer;
-  margin-bottom: 20px;
-  font-weight: 600;
-}
-
 .logo {
   width: 180px;
   aspect-ratio: 1;
@@ -120,4 +118,3 @@ body {
   background-position: center;
   margin: 0 auto;
 }
-

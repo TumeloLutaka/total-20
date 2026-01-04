@@ -24,7 +24,7 @@ export const socketHandler = (_io, gameManager) => {
       SocketEvents.S2C.PRIVATE_MESSAGE,
       "Hello User!" + socket.request.user.id
     );
-    io.to(socket.id).emit(SocketEvents.S2C.GIVE_ID);
+    io.to(socket.id).emit(SocketEvents.S2C.GIVE_ID, socket.request.user.id);
 
     // ====== CLIENT TO SERVER EMIT ====== /
     lobbyHandler(io, socket, gameManager);

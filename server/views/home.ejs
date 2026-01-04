@@ -3,21 +3,48 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Total Twenty - Home</title>
+    <link rel="stylesheet" href="/css/main.css" />
     <link rel="stylesheet" href="/css/home.css" />
   </head>
   <body>
-    <h1>Hi <%= user.name %></h1>
+    <header>
+      <h1 class="header__text">Welcome, <%= user.name %></h1>
 
-    <form action="/logout?_method=DELETE" method="POST">
-      <button type="submit">Log Out</button>
-    </form>
-    <label>ID: </label>
-    <h1 id="socket_id"></h1>
-    <ul id="messages"></ul>
-    <form id="form" action="">
-      <input id="input" autocomplete="off" /><button>Join Room</button>
-    </form>
+      <form action="/logout?_method=DELETE" method="POST">
+        <button class="btn-glass" type="submit">Log Out</button>
+      </form>
+    </header>
+
+    <div class="container__glass">
+      <div class="wrapper__home-content">
+        <div class="wr__home-content-left">
+          <h2>Join or Create a Game Room</h2>
+          <p>ID: <span id="user-id"></span></p>
+          <form id="form" action="">
+            <div class="input-box">
+              <input
+                id="input"
+                autocomplete="off"
+                placeholder="Enter a room code"
+              />
+            </div>
+            <div class="input-box">
+              <input type="submit" value="Create or Join Room" />
+            </div>
+          </form>
+        </div>
+
+        <div class="wr__home-content-right">
+          <h2 class="text__users-header">Online Users</h2>
+          <ul id="messages">
+            <li>
+              <p class="user_message">user 1</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script type="module" src="/index.js"></script>
