@@ -1,74 +1,5 @@
 /* style.css */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Montserrat:wght@700&display=swap");
-/* ===================== CSS RESET =====================*/
-/* 1. Use a more-intuitive box-sizing model */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-/* 2. Remove default margins and paddings */
-* {
-  margin: 0;
-  padding: 0;
-}
-
-/* 3. Allow percentage-based heights in the application */
-html,
-body {
-  height: 100%;
-}
-
-/* 4. Improve media defaults (prevents images from overflowing cards) */
-img,
-picture,
-video,
-canvas,
-svg {
-  display: block;
-  max-width: 100%;
-}
-
-/* 5. Remove built-in form typography styles */
-input,
-button,
-textarea,
-select {
-  font: inherit;
-}
-
-/* 6. Avoid text overflows */
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  overflow-wrap: break-word;
-}
-
-/* 7. Improve font rendering (highly recommended for UI) */
-body {
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* 8. Remove list styles (useful for card decks/menus) */
-ul,
-ol {
-  list-style: none;
-}
-
-/* 9. Remove default link styling */
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-/* ===================== CSS RESET =====================*/
-
 /* ===================== CSS VARIABLES =====================*/
 :root {
   --card-height: 18vh;
@@ -76,14 +7,28 @@ a {
 
   --blur-shadow-col-1: #00ff88;
 
-  /* Colors */
+  /* == Colors ==  */
   --col-primary: #00ff88;
-  --col-white: #fff;
+  --col-secondary: #ffcc00;
+  
+  /* Colors: White */
+  --col-white-hue: 0;
+  --col-white: hsl(var(--col-white-hue), 0%, 100%);
+  --col-white-80: hsl(var(--col-white-hue), 0%, 80%);
+  
+  /* == Font sizes==  */
+  /* paragraph*/
+  --text-base: 1rem;
+  /* headers*/
+  --text-header-1: clamp(1.125rem. 1.5rem, 2rem);
+
+
 }
 /* ===================== CSS VARIABLES =====================*/
-
-/* ===================== CSS =====================*/
+/* -------------------------------------------------------- */
+/* ========================== CSS ==========================*/
 body {
+  font-size: var(--text-base);
   font-family: "Inter", sans-serif;
 }
 
@@ -99,8 +44,16 @@ body {
 #final-scores {
   font-size: 1.4rem;
   font-weight: 600;
-  color: #ffcc00;
+  color: var(--col-secondary);
   margin-inline: 20px;
+}
+
+.background-image-blur {
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-attachment: scroll;
+  backdrop-filter: blur(5px);
 }
 
 .bot-card {
@@ -121,23 +74,6 @@ body {
 }
 .btn:hover {
   background: rgba(255, 255, 255);
-}
-
-.button-container {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-
-  border-radius: 20px;
-  background-color: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgb(255, 255, 255, 0.4);
-  border-left: 1px solid rgb(255, 255, 255, 0.3);
-  box-shadow: 3px 3px 3px rgb(0, 0, 0, 0.089);
-  padding: 10px;
 }
 
 .card-inner {
@@ -205,6 +141,16 @@ body {
 .input-box {
   width: 100%;
   margin-top: 20px;
+}
+
+.glass-background {
+  background: rgb(255, 255, 255, 0.1);
+  border-radius: 10px;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .input-box input {

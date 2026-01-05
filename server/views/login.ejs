@@ -1,45 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - Total Twenty</title>
-    <link rel="stylesheet" href="/css/main.css" />
-    <link rel="stylesheet" href="/css/login.css" />
-  </head>
-  <body>
-    <div class="container__login-form">
-      <div class="box">
-        <div class="square" style="--i: 0"></div>
-        <div class="square" style="--i: 1"></div>
-        <div class="square" style="--i: 2"></div>
-        <div class="square" style="--i: 3"></div>
-        <div class="square" style="--i: 4"></div>
 
-        <div class="login-form">
-          <div class="logo"></div>
-          <h1>Login</h1>
-          <form action="/login" method="POST">
-            <div class="input-box">
-              <input
-                type="text"
-                name="name"
-                id="name"
-                placeholder="Username"
-                required
-                maxlength="12"
-              />
-            </div>
-            <% if (error && error.length > 0) {%>
-            <div class="error"><%= error[0] %></div>
-            <%}%>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Total Twenty</title>
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/login.css" />
+</head>
 
-            <div class="input-box">
-              <input type="submit" value="Login" />
-            </div>
-          </form>
+<body>
+  <div class="background-image-blur login-page">
+    <div class="login-container">
+      <div class="glass-background login-form-container">
+        <div class="box">
+          <div class="square" style="--i: 0"></div>
+          <div class="square" style="--i: 1"></div>
+          <div class="square" style="--i: 2"></div>
+          <div class="square" style="--i: 3"></div>
+          <div class="square" style="--i: 4"></div>
+
+          <div class="login-form">
+            <div class="logo"></div>
+            <h1>Login</h1>
+            <form action="/login" method="POST">
+              <div class="input-box">
+                <input type="text" name="name" id="name" placeholder="Username" required maxlength="12" />
+              </div>
+              <% if (error && error.length> 0) {%>
+                <div class="error">
+                  <%= error[0] %>
+                </div>
+                <!-- TODO: Style the error text -->
+                <%}%>
+
+                  <div class="input-box">
+                    <input type="submit" value="Login" />
+                  </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
-  </body>
+  </div>
+
+</body>
+
 </html>

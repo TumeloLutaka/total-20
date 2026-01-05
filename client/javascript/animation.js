@@ -47,7 +47,7 @@ export function moveCard(card, targetPile) {
 
 export function moveAndFlipCard(cardOuter, targetPile) {
   return new Promise((resolve) => {
-    const target = targetPile.firstChild;
+    const target = targetPile.children[0];
     const cardInner = cardOuter.querySelector(".card-inner");
 
     // 1. Capture current bounding rect
@@ -100,7 +100,7 @@ export function moveAndFlipCard(cardOuter, targetPile) {
 export function moveAndFlipOpponentCard(cardOuter, targetPile) {
   return new Promise((resolve) => {
     // Get the current child in the pile and set that as the target
-    const target = targetPile.firstChild;
+    const target = targetPile.children[0];
     const cardInner = cardOuter.querySelector(".card-inner");
 
     // 1. Capture bounding rects
@@ -149,4 +149,78 @@ export function moveAndFlipOpponentCard(cardOuter, targetPile) {
       resolve();
     }, 1400); // flip (600ms) + delay (100ms) + move (600ms) + buffer (100ms)
   });
+}
+
+export function showEndTurnIndicator(indicator, isCaller) {
+  return new Promise((resolve) => {
+    // Set up the listener FIRST
+    indicator.addEventListener('animationend', (event) => {
+      // Remove the class so it can be re-triggered later
+      indicator.classList.remove('animate-phase', "opponent");
+      
+      // IMPORTANT: Resolve inside here so the game waits for the animation
+      resolve(); 
+    }, { once: true });
+
+    const indicatorText = indicator.querySelector(".player-indicator-text")
+    indicatorText.textContent = "Turn End"
+
+    if(isCaller)
+        indicator.classList.add("opponent")
+
+
+    // Trigger the animation
+    // Note: 'classList' must have a capital 'L'
+    indicator.classList.add('animate-phase');
+  });
+}
+
+export function showPlayerTurnIndicator(indicator, isCaller) {
+  return new Promise((resolve) => {
+    // Set up the listener FIRST
+    indicator.addEventListener('animationend', (event) => {
+      // Remove the class so it can be re-triggered later
+      indicator.classList.remove('animate-phase', "opponent");
+      
+      // IMPORTANT: Resolve inside here so the game waits for the animation
+      resolve(); 
+    }, { once: true });
+
+    const indicatorText = indicator.querySelector(".player-indicator-text")
+    const text = isCaller ? "Your Turn" : "Opponent's Turn"
+    indicatorText.textContent = text
+
+    if(!isCaller)
+        indicator.classList.add("opponent")
+
+
+    // Trigger the animation
+    // Note: 'classList' must have a capital 'L'
+    indicator.classList.add('animate-phase');
+  });}
+
+export function showStandingUserIndicator(indicator, isCaller) {
+  return new Promise((resolve) => {
+    // Set up the listener FIRST
+    indicator.addEventListener('animationend', (event) => {
+      // Remove the class so it can be re-triggered later
+      indicator.classList.remove('animate-phase', "opponent");
+      
+      // IMPORTANT: Resolve inside here so the game waits for the animation
+      resolve(); 
+    }, { once: true });
+
+    const indicatorText = indicator.querySelector(".player-indicator-text")
+    const text = isCaller ? "You Stand" : "Opponent Stands"
+    indicatorText.textContent = text
+
+    if(!isCaller)
+        indicator.classList.add("opponent")
+
+
+    // Trigger the animation
+    // Note: 'classList' must have a capital 'L'
+    indicator.classList.add('animate-phase');
+  });
+
 }

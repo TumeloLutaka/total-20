@@ -14,7 +14,7 @@ import session from "express-session";
 import passport from "passport";
 import { Strategy as CustomStrategy } from "passport-custom";
 import passportSocketIO from "passport.socketio";
-import flash from "connect-flash";
+import flash from "connect-flash"; 
 
 // Personal imports
 import { socketHandler } from "./src/socketConfig.js";

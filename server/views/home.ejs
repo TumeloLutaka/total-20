@@ -4,10 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Total Twenty - Home</title>
+    <link rel="stylesheet" href="/css/reset.css" />
     <link rel="stylesheet" href="/css/main.css" />
     <link rel="stylesheet" href="/css/home.css" />
   </head>
   <body>
+    <div class="background-image-blur home-page">
     <header>
       <h1 class="header__text">Welcome, <%= user.name %></h1>
 
@@ -16,8 +18,8 @@
       </form>
     </header>
 
-    <div class="container__glass">
-      <div class="wrapper__home-content">
+    <div class="glass-background content-container">
+      <div class="content-wrapper">
         <div class="wr__home-content-left">
           <h2>Join or Create a Game Room</h2>
           <p>ID: <span id="user-id"></span></p>
@@ -46,6 +48,7 @@
       </div>
     </div>
 
+    </div>
     <script src="/socket.io/socket.io.js"></script>
     <script type="module" src="/index.js"></script>
   </body>

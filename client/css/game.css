@@ -9,16 +9,167 @@
   box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
 }
 
+.button-container {
+  grid-area: btn;
+  display: flex;
+  gap: .5rem;
+
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
 .draw-deck {
   grid-area: draw;
   display: flex;
-  position: relative; /* Becomes the anchor for the children */
+  position: relative;
+  /* Becomes the anchor for the children */
   align-items: center;
   justify-content: center;
 }
 
-.draw-deck > * {
-  position: absolute; /* Takes them out of the column flow and stacks them */
+.draw-deck>* {
+  position: absolute;
+  /* Takes them out of the column flow and stacks them */
+}
+
+.hud-label {
+  font-size: 0.6rem;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.hud-label-player {
+  color: white;
+  /* The "filament" of the neon bulb */
+
+  text-shadow:
+    /* 1. Small colored glow to bleed color into the white text */
+    0 0 7px var(--blur-shadow-col-1),
+    0 0 10px var(--blur-shadow-col-1),
+    /* 2. Larger, softer glows for the "bloom" effect */
+    0 0 21px var(--blur-shadow-col-1),
+    0 0 42px var(--blur-shadow-col-1), 0 0 82px var(--blur-shadow-col-1),
+    0 0 92px var(--blur-shadow-col-1), 0 0 102px var(--blur-shadow-col-1),
+    0 0 151px var(--blur-shadow-col-1);
+}
+
+.hud-points {
+  font-family: "Montserrat", sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1;
+  margin: 8px 0;
+  color: #ffcc00;
+  /* Distinct color for the main score */
+}
+
+.hud-status {
+  font-size: 0.7rem;
+  /* font-weight: bold; */
+  /* padding: 3px 10px; */
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: .5rem;
+  color: var(--col-primary);
+  /* Green for active */
+}
+
+.game-over-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.game-over-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.game-over-modal {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  padding: 60px 80px;
+  min-width: 500px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  animation: scaleIn 0.5s ease-out;
+  animation-delay: 0.1s;
+  animation-fill-mode: backwards;
+}
+
+.game-over-title-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 10px;
+}
+
+.game-over-title-container::before {
+  content: "";
+  width: 100px;
+  height: 2px;
+  background: white;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8),
+    0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+.game-over-title-container::after {
+  content: "";
+  width: 100px;
+  height: 2px;
+  background: white;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8),
+    0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+.game-over-text {
+  font-family: "Montserrat", sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  color: white;
+  margin: 0;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 1),
+    0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6),
+    0 0 80px rgba(255, 255, 255, 0.4), 0 0 120px rgba(255, 255, 255, 0.2);
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.game-over-text::before {
+  content: "MATCH OVER";
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: -1;
+  color: transparent;
+  filter: blur(40px);
+  opacity: 0.6;
+  text-shadow: 0 0 60px rgba(255, 255, 255, 1),
+    0 0 100px rgba(255, 255, 255, 0.8), 0 0 140px rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.2em;
+}
+
+.game-over-results {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.2rem;
+  line-height: 1.8;
 }
 
 .game-board {
@@ -69,6 +220,15 @@
   grid-template-areas: header;
 }
 
+.game-page {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
+    url("../images/game-background.png");
+  /* perspective: 1000px; */ 
+}
+
 .game-title {
   position: absolute;
   top: 50%;
@@ -90,7 +250,8 @@
   grid-template-rows: auto 1fr;
   grid-template-areas:
     "left header right"
-    "left game right";
+    "game game game"
+    "btn btn btn";
   place-items: center;
   gap: 10px;
 
@@ -115,19 +276,6 @@
   /* transform-style: preserve-3d;
   transform: translateZ(-500px) rotateX(45deg); */
   grid-area: game;
-}
-
-.linear-bg {
-  display: grid;
-  place-items: center;
-  height: 100%;
-  background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
-    url("../images/game-background.png");
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-attachment: fixed;
-  background-position: center;
-  /* perspective: 1000px; */
 }
 
 .opponent-hand {
@@ -183,11 +331,81 @@
   grid-area: hand;
 }
 
+.player-hud-card {
+  pointer-events: auto;
+  border-radius: 16px;
+  min-width: 160px;
+  text-align: center;
+}
+
+.player-indicator {
+  --col-highlight: var(--col-primary);
+  --shoot-direction: 1;
+
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-family: "Montserrat", sans-serif;
+  font-size: 40px;
+  font-weight: 600;
+  color: var(--col-white);
+  text-shadow:
+    -1px -1px 5px var(--col-highlight),
+    1px -1px 5px var(--col-highlight),
+    -1px 1px 5px var(--col-highlight),
+    1px 1px 5px var(--col-highlight);
+  pointer-events: none;
+}
+
+.player-indicator .highlight {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 16px;
+  width: 160%;
+  opacity: 0;
+  border-radius: 50%;
+  background-color: var(--col-highlight);
+  filter: blur(10px);
+  box-shadow:
+    0 0 15px var(--col-highlight),
+    0 0 20px var(--col-highlight);
+}
+
+.player-indicator.opponent {
+  --col-highlight: var(--col-secondary);
+  --shoot-direction: -1;
+}
+
+.player-indicator.animate-phase {
+  animation: pop-and-shoot 2.5s ease-in-out forwards;
+}
+
 .play-pile {
   flex-direction: column;
   justify-content: space-between;
   padding: 5px;
 }
+
+
+
+
+/* Style for the Username */
+.player-display-name {
+  font-family: "Montserrat", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 2px;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Prevents long names from breaking UI */
+  white-space: nowrap;
+}
+
 
 .round-display {
   color: hsl(0, 0%, 80%);
@@ -227,165 +445,6 @@
   pointer-events: none;
 }
 
-.player-hud-card {
-  pointer-events: auto;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  padding: 12px 20px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  min-width: 160px;
-  text-align: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-}
-
-/* Style for the Username */
-.player-display-name {
-  font-family: "Montserrat", sans-serif;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #fff;
-  margin-top: 2px;
-  text-transform: uppercase;
-  overflow: hidden;
-  text-overflow: ellipsis; /* Prevents long names from breaking UI */
-  white-space: nowrap;
-}
-
-.hud-label {
-  font-size: 0.6rem;
-  letter-spacing: 1.5px;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.hud-label-player {
-  color: white; /* The "filament" of the neon bulb */
-
-  text-shadow: 
-    /* 1. Small colored glow to bleed color into the white text */ 0
-      0 7px var(--blur-shadow-col-1),
-    0 0 10px var(--blur-shadow-col-1),
-    /* 2. Larger, softer glows for the "bloom" effect */ 0 0 21px
-      var(--blur-shadow-col-1),
-    0 0 42px var(--blur-shadow-col-1), 0 0 82px var(--blur-shadow-col-1),
-    0 0 92px var(--blur-shadow-col-1), 0 0 102px var(--blur-shadow-col-1),
-    0 0 151px var(--blur-shadow-col-1);
-}
-
-.hud-points {
-  font-family: "Montserrat", sans-serif;
-  font-size: 2.2rem;
-  font-weight: 800;
-  line-height: 1;
-  margin: 8px 0;
-  color: #ffcc00; /* Distinct color for the main score */
-}
-
-.hud-status {
-  font-size: 0.7rem;
-  font-weight: bold;
-  padding: 3px 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  color: #00ff88; /* Green for active */
-}
-
-.game-over-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
-  opacity: 1;
-  pointer-events: auto;
-  z-index: 1000;
-  display: grid;
-  place-items: center;
-  animation: fadeIn 0.4s ease-out;
-}
-.game-over-overlay.hidden {
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
-}
-
-.game-over-modal {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px);
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  padding: 60px 80px;
-  min-width: 500px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  animation: scaleIn 0.5s ease-out;
-  animation-delay: 0.1s;
-  animation-fill-mode: backwards;
-}
-
-.game-over-title-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 30px;
-  margin-bottom: 10px;
-}
-.game-over-title-container::before {
-  content: "";
-  width: 100px;
-  height: 2px;
-  background: white;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8),
-    0 0 20px rgba(255, 255, 255, 0.4);
-}
-.game-over-title-container::after {
-  content: "";
-  width: 100px;
-  height: 2px;
-  background: white;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8),
-    0 0 20px rgba(255, 255, 255, 0.4);
-}
-
-.game-over-text {
-  font-family: "Montserrat", sans-serif;
-  font-size: 3rem;
-  font-weight: 800;
-  color: white;
-  margin: 0;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  position: relative;
-  z-index: 2;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 1),
-    0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6),
-    0 0 80px rgba(255, 255, 255, 0.4), 0 0 120px rgba(255, 255, 255, 0.2);
-  animation: pulseGlow 2s ease-in-out infinite;
-}
-
-.game-over-text::before {
-  content: "MATCH OVER";
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: -1;
-  color: transparent;
-  filter: blur(40px);
-  opacity: 0.6;
-  text-shadow: 0 0 60px rgba(255, 255, 255, 1),
-    0 0 100px rgba(255, 255, 255, 0.8), 0 0 140px rgba(255, 255, 255, 0.6);
-  letter-spacing: 0.2em;
-}
-
-.game-over-results {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1.2rem;
-  line-height: 1.8;
-}
-
 /* ===================== ANIMATIONS =====================*/
 @keyframes fadeIn {
   0% {
@@ -409,12 +468,33 @@
   }
 }
 
+@keyframes pop-and-shoot {
+  0% { 
+    transform: translate(-50%, -50%) scale(0.5); 
+    opacity: 0; 
+  }
+  15% { 
+    transform: translate(-50%, -50%) scale(1.1); 
+    opacity: 1; 
+  }
+  80% { 
+    transform: translate(-50%, -50%) scale(1); 
+    opacity: 1; 
+  }
+  100% { 
+    /* We multiply 200% by our direction variable */
+    transform: translate(-50%, calc(var(--shoot-direction) * 200%)) scale(1); 
+    opacity: 0;
+  }
+}
+
 @keyframes pulseGlow {
   0% {
     text-shadow: 0 0 10px rgba(255, 255, 255, 1),
       0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6),
       0 0 80px rgba(255, 255, 255, 0.4), 0 0 120px rgba(255, 255, 255, 0.2);
   }
+
   50% {
     text-shadow: 0 0 15px rgba(255, 255, 255, 1),
       0 0 30px rgba(255, 255, 255, 0.8), 0 0 50px rgba(255, 255, 255, 0.6),

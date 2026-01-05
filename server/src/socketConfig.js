@@ -11,6 +11,7 @@ const VALID_TRANSITIONS = {
     ActionPhases.END_PHASE, // client auto-response
   ],
   [ActionPhases.TOTAL20_HIT]: [ActionPhases.STAND_USER, ActionPhases.END_PHASE],
+  [ActionPhases.STAND_USER]: [ActionPhases.END_PHASE]
 };
 
 let io = null;
@@ -283,11 +284,11 @@ function processAction(gameState, actionData) {
       if (player.hasStood) {
         const upkeepPayload = createPlayLoad(gameState, {
           action: ActionPhases.UPKEEP_PHASE,
-          nextPhase: ActionPhases.END_PHASE,
+          nextPhase: ActionPhases.STAND_USER,
         });
         gameState.actionStream.push(upkeepPayload);
 
-        gameState.status = ActionPhases.END_PHASE;
+        gameState.status = ActionPhases.STAND_USER;
         break;
       }
 

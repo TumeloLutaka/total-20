@@ -4,13 +4,13 @@ import { markPlaybackStepComplete } from "./playbackHandler.js";
 import * as Animations from "./animation.js";
 import { ActionPhases } from "../shared/actionPhases.js";
 
-// ========== BUTTONS TO BE DELETED ========== \\
+// ========== BUTTONS========== \\
 const btnDrawCard = document.getElementById("btn-draw_card");
 const btnEndTurn = document.getElementById("btn-end_turn");
 const btnHome = document.getElementById("btn-home");
 const btnStandUser = document.getElementById("btn-stand_user");
 
-// ========== HTML ELEMENTS TO BE DELETED ========== \\
+// ========== HTML ELEMENTS ========== \\
 const playerPoints1 = document.getElementById("player_points_1");
 const playerPoints2 = document.getElementById("player_points_2");
 const scoreHolder1 = document.querySelector("#score_holder_1");
@@ -21,10 +21,13 @@ const playerTurnInfo = document.querySelector("#player_turn_info");
 const roundInfo = document.getElementById("round_info");
 const status = document.getElementById("game_status");
 
-// ========== HTML ELEMENTS CARDS TO BE IMPROVED ========== \\
+const playerIndicator = document.querySelector(".player-indicator")
+
+// ========== HTML CARD ELEMENTS ========== \\
 const drawDeck = document.querySelector(".draw-deck");
 const playerHand = document.querySelector(".player-hand");
 const opponentHand = document.querySelector(".opponent-hand");
+
 
 // ========== EVENT LISTENERS ========== \\
 btnDrawCard.addEventListener("click", () => IntentHandler.drawCard());
@@ -55,11 +58,11 @@ function handleGameOver(actionData) {
 
   winnerAnnouncement.textContent = `${actionData.winner.text} Wins`;
   finalScores.textContent = `${actionData.player1Values.points} - ${actionData.player2Values.points}`;
-  
+
   document.querySelector("#final-scores-1").textContent =
     actionData.player1Values.username;
   document.querySelector("#final-scores-2").textContent =
-    actionData.player2Values.username; 
+    actionData.player2Values.username;
 
   setTimeout(() => {
     gameOverOverlay.classList.remove("hidden");
@@ -152,9 +155,15 @@ export async function drawCard(actionData) {
   markPlaybackStepComplete();
 }
 
-export function endTurn(actionData) {
+export async function endTurn(actionData) {
   updateScore(actionData.player1Values, actionData.player2Values);
   updateUI(actionData);
+
+  // Show end of turn indicator customize based on which caller it is.
+  const isCaller =
+    actionData.callerIndex === actionData.playerIndex ? true : false;
+
+  await Animations.showEndTurnIndicator(playerIndicator, isCaller)
 
   setTimeout(() => {
     // TODO: Have animation for showing the changing of phases and turns
@@ -168,16 +177,19 @@ export function endTurn(actionData) {
   }, 1000);
 }
 
-export function handleUpkeep(actionData) {
+export async function handleUpkeep(actionData) {
   updateScore(actionData.player1Values, actionData.player2Values);
   updateUI(actionData);
 
+
   const isCaller = actionData.callerIndex === actionData.playerIndex;
+
+  await Animations.showPlayerTurnIndicator(playerIndicator, isCaller)
 
   markPlaybackStepComplete();
 
-  if (isCaller && actionData.nextPhase === ActionPhases.END_PHASE) {
-    IntentHandler.endTurn();
+  if (isCaller && actionData.nextPhase === ActionPhases.STAND_USER) {
+    IntentHandler.standUser();
   }
 }
 
@@ -234,13 +246,15 @@ export async function playCard(actionData) {
   markPlaybackStepComplete();
 }
 
-export function standUser(actionData) {
+export async function standUser(actionData) {
   // Update the UI to indicate the current player standing
   updateUI(actionData);
 
   // Only call end turn if client is the one who called stand.
   const isCaller =
     actionData.callerIndex === actionData.playerIndex ? true : false;
+
+  await Animations.showStandingUserIndicator(playerIndicator, isCaller)
 
   setTimeout(() => {
     // TODO: Have animation for showing the changing of phases and turns
