@@ -1,7 +1,7 @@
 // Get intent handler function
 import * as IntentHandler from "./intentHandler.js";
 import { markPlaybackStepComplete } from "./playbackHandler.js";
-import * as Animations from "./animation.js";
+import * as Animations from "./animationHandler.js";
 import { ActionPhases } from "../shared/actionPhases.js";
 
 // ========== BUTTONS========== \\
@@ -9,6 +9,8 @@ const btnDrawCard = document.getElementById("btn-draw_card");
 const btnEndTurn = document.getElementById("btn-end_turn");
 const btnHome = document.getElementById("btn-home");
 const btnStandUser = document.getElementById("btn-stand_user");
+
+const btnReady = document.querySelector("#btn-ready");
 
 // ========== HTML ELEMENTS ========== \\
 const playerPoints1 = document.getElementById("player_points_1");
@@ -22,6 +24,7 @@ const roundInfo = document.getElementById("round_info");
 const status = document.getElementById("game_status");
 
 const playerIndicator = document.querySelector(".player-indicator")
+const startGameOverlay = document.querySelector(".start-game-overlay")
 
 // ========== HTML CARD ELEMENTS ========== \\
 const drawDeck = document.querySelector(".draw-deck");
@@ -33,6 +36,7 @@ const opponentHand = document.querySelector(".opponent-hand");
 btnDrawCard.addEventListener("click", () => IntentHandler.drawCard());
 btnEndTurn.addEventListener("click", () => IntentHandler.endTurn());
 btnHome.addEventListener("click", () => (window.location.href = "/"));
+btnReady.addEventListener("click", () => removeStartOverlay())
 btnStandUser.addEventListener("click", () => IntentHandler.standUser());
 
 // ==================== PRIVATE  FUNCTIONS ==================== \\
@@ -67,6 +71,10 @@ function handleGameOver(actionData) {
   setTimeout(() => {
     gameOverOverlay.classList.remove("hidden");
   }, 500);
+}
+
+async function removeStartOverlay() {
+  startGameOverlay.classList.add("hidden")
 }
 
 function renderHand(hand) {
@@ -216,6 +224,10 @@ export function initializeUI(actionData) {
 
   renderHand(playerValues.hand);
   renderOpponentHand(actionData.opponentHandCount);
+
+  btnReady.disabled = false
+  btnReady.classList.add("btn-primary")
+  btnReady.textContent = "Ready"
 
   markPlaybackStepComplete();
 }

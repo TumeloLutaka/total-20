@@ -1,8 +1,10 @@
 /* style.css */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Montserrat:wght@700&display=swap");
+
 /* ===================== CSS VARIABLES =====================*/
 :root {
-  --card-height: 18vh;
+  --card-width: 6px;
+  --card-height: calc(var(--card-width) * 1.4);
   --border-sm: 1px dashed rgba(255, 255, 255, 0.3);
 
   --blur-shadow-col-1: #00ff88;
@@ -10,42 +12,42 @@
   /* == Colors ==  */
   --col-primary: #00ff88;
   --col-secondary: #ffcc00;
-  
+
   /* Colors: White */
   --col-white-hue: 0;
   --col-white: hsl(var(--col-white-hue), 0%, 100%);
   --col-white-80: hsl(var(--col-white-hue), 0%, 80%);
-  
+
   /* == Font sizes==  */
   /* paragraph*/
   --text-base: 1rem;
+  --text-sm: 0.875rem;
+  --text-x-sm: 0.75rem;
+  --text-caption: 0.5rem;
   /* headers*/
   --text-header-1: clamp(1.125rem. 1.5rem, 2rem);
 
+  /* == Sizing ==  */
+  /* Border radius */
+  --br-md: 1.125rem;
+  --br-base: 1rem;
+  --br-sm: .5rem;
+  --br-x-sm: .25rem;
+  /* Margin - Padding */
+  --sizing-x-lg: 2.5rem;
+  --sizing-md: 1.25rem;
+  --sizing-base: 1rem;
+  --sizing-sm: 0.5rem;
+  --sizing-x-sm: 0.25rem;
 
 }
+
 /* ===================== CSS VARIABLES =====================*/
 /* -------------------------------------------------------- */
 /* ========================== CSS ==========================*/
 body {
   font-size: var(--text-base);
   font-family: "Inter", sans-serif;
-}
-
-#winner-announcement {
-  font-family: "Montserrat", sans-serif;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--col-primary);
-  margin-bottom: 10px;
-  text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
-}
-
-#final-scores {
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: var(--col-secondary);
-  margin-inline: 20px;
 }
 
 .background-image-blur {
@@ -60,82 +62,6 @@ body {
   height: var(--card-height);
   aspect-ratio: 1 / 1.4;
   visibility: hidden;
-}
-
-.btn-glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  color: white;
-  padding: 10px 20px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-.btn:hover {
-  background: rgba(255, 255, 255);
-}
-
-.card-inner {
-  width: 100%;
-  height: 100%;
-  transform-style: preserve-3d;
-  transition: transform 0.3s ease; /* flip duration */
-}
-
-.card-front,
-.card-back {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-weight: bold;
-  font-size: 1.5rem;
-  border-radius: 8px;
-  backface-visibility: hidden; /* critical: only visible when facing front */
-}
-
-.card-back {
-  background: repeating-linear-gradient(
-    45deg,
-    crimson,
-    crimson 10px,
-    darkred 10px,
-    darkred 20px
-  );
-}
-
-.card-front {
-  background: white;
-  color: black;
-  transform: rotateY(180deg); /* back face starts rotated */
-}
-
-.card-outer {
-  height: var(--card-height);
-  aspect-ratio: 1/ 1.4;
-  position: relative; /* normal in hand */
-  cursor: pointer;
-  perspective: 1000px; /* enables 3D inner flip */
-}
-
-.card-player {
-  transform: rotateY(180deg);
-}
-
-.card-blue {
-  background: blue;
-  color: white;
-}
-
-.card-red {
-  background: red;
-  color: white;
-}
-
-.card-purple {
-  background: purple;
-  color: white;
 }
 
 .input-box {
@@ -153,7 +79,8 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.input-box input {
+.input-box input,
+.btn {
   width: 100%;
   background: rgba(255, 255, 255, 0.2);
   border: none;
@@ -168,14 +95,29 @@ body {
   color: white;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
+
 .input-box input::placeholder {
   color: white;
 }
 
-.input-box input[type="submit"] {
+.input-box input[type="submit"],
+.btn {
   background: white;
   color: #666;
   cursor: pointer;
-  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.input-box input[type="submit"] {
+  background-color: white;
+  color: #666;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-secondary {
+  color: white;
+  background: #666;
+  cursor: pointer;
   font-weight: 600;
 }

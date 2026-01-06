@@ -1,0 +1,74 @@
+@media only screen and (min-width: 768px) {
+    :root {
+        --card-height: 18vh;
+        --card-width: calc(var(--card-height) / 1.4);
+    }
+
+    .button-container {
+        position: fixed;
+        bottom: var(--sizing-base);
+        left: var(--sizing-base);
+        display: flex;
+        flex-direction: column;
+        gap: var(--sizing-sm);
+        border-radius: var(--br-base);
+        padding: var(--sizing-base);
+    }
+
+    .game-info-center {
+        padding: var(--sizing-md) var(--sizing-x-lg);
+        border-bottom-left-radius: var(--br-md);
+        border-bottom-right-radius: var(--br-md);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        grid-template-areas: header;
+    }
+
+    .game-over-actions {
+        flex-direction: row;
+    }
+
+.game-over-modal {
+  padding: var(--sizing-base);
+}
+
+
+    .game-view {
+        grid-template-columns: auto 1fr auto;
+        grid-template-rows: auto 1fr;
+        grid-template-areas:
+            "left header right"
+            "left game left";
+        place-items: center;
+        gap: 10px;
+
+        height: 100%;
+        max-height: 100vh;
+        overflow: hidden;
+        width: 100%;
+        padding: 0 var(--sizing-sm) var(--sizing-sm) var(--sizing-sm);
+    }
+
+    .phase-tag {
+        font-size: var(--text-sm);
+        padding: var(--sizing-x-sm) var(--sizing-sm);
+
+        border-radius: 4px;
+        font-weight: 900;
+        margin-bottom: 4px;
+    }
+
+    .player-hud-card {
+        padding: var(--sizing-md);
+        pointer-events: auto;
+        border-radius: var(--br-sm);
+        text-align: center;
+    }
+
+    .round-display {
+        font-size: var(--text-sm);
+    }
+
+    .turn-display {
+        font-size: var(--text-sm);
+    }
+}

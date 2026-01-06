@@ -157,7 +157,7 @@ app.delete("/logout", (req, res, next) => {
   });
 });
 
-socketHandler(io, gameManager);
+socketHandler(io, gameManager, users);
 
 const PORT = 3000;
 server.listen(PORT, () => {

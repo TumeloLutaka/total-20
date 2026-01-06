@@ -10,5 +10,6 @@ export const SocketEvents = {
     GIVE_ID:"give id",
     PRIVATE_MESSAGE: "private message",
     SEND_GAME_STATE: "send game state",
+    USER_CONNECTED: "user connected"
   },
 };

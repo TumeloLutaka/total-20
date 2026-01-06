@@ -8,10 +8,13 @@
   <link rel="stylesheet" href="/css/reset.css" />
   <link rel="stylesheet" href="/css/main.css" />
   <link rel="stylesheet" href="/css/game.css" />
+  <link rel="stylesheet" href="/css/game-tablet.css" />
+  <link rel="stylesheet" href="/css/game-overlays.css" />
 </head>
 
 <body>
-  <div class="background-image-blur game-page">
+  <div class="background-image-blur background-image-container"></div>
+  <div class="game-page">
     <div class="game-view">
       <div class="glass-background player-hud-card p1-card">
         <div class="hud-label">PLAYER 1</div>
@@ -35,7 +38,7 @@
         <div class="hud-status" id="p2_stood">ACTIVE</div>
       </div>
 
-      <div class="glass">
+      <div class="glass-background game-wrapper">
         <div class="game-board">
           <h1 class="game-title">Total Twenty</h1>
 
@@ -93,13 +96,19 @@
 
   </div>
 
+  <div class="start-game-overlay">
+    <div class="loading-indicator-logo"></div>
+    <button class="btn-glass" id="btn-ready">waiting...</button>
+
+</div>
+
   <div class="game-over-overlay hidden">
-    <div class="game-over-modal">
+    <div class="glass-background game-over-modal">
       <div class="game-over-title-container">
-        <h2 class="game-over-text">MATCH OVER</h2>
+            <div class="game-over-logo"></div>
       </div>
       <div class="game-over-results">
-        <p id="winner-announcement">Player 1 Wins!</p>
+        <p id="winner-announcement">Winner Player 1!</p>
         <p>
           <span id="final-scores-1">Player 1</span>
           <span id="final-scores">5 - 3</span>
@@ -107,10 +116,10 @@
         </p>
       </div>
       <div class="game-over-actions">
-        <button class="btn-glass btn-primary" id="btn-play-again">
+        <!-- <button class="btn" id="btn-play-again">
           Play Again
-        </button>
-        <button class="btn-glass" id="btn-home">Home</button>
+        </button> -->
+        <button class="btn btn-secondary" id="btn-home">Exit</button>
       </div>
     </div>
   </div>
@@ -120,9 +129,13 @@
     <div class="player-indicator-text">Your Turn</div>
   </div>
 
+  <audio id="bg-music" loop>
+    <source src="/audio/music/game-loop-1.mp3" type="audio/mpeg"/>
+  </audio>
 
-  <!-- <script src="/socket.io/socket.io.js"></script> -->
-  <!-- <script type="module" src="/javascript/main.js"></script> -->
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="/javascript/main.js"></script>
 </body>
 
 </html>

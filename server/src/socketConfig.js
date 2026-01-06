@@ -16,7 +16,7 @@ const VALID_TRANSITIONS = {
 
 let io = null;
 
-export const socketHandler = (_io, gameManager) => {
+export const socketHandler = (_io, gameManager, users) => {
   io = _io;
 
   io.on("connection", (socket) => {
@@ -26,6 +26,9 @@ export const socketHandler = (_io, gameManager) => {
       "Hello User!" + socket.request.user.id
     );
     io.to(socket.id).emit(SocketEvents.S2C.GIVE_ID, socket.request.user.id);
+
+    const userList = users.map((user) => user.name)
+    io.emit(SocketEvents.S2C.USER_CONNECTED, userList)
 
     // ====== CLIENT TO SERVER EMIT ====== /
     lobbyHandler(io, socket, gameManager);

@@ -5,6 +5,7 @@ const socket = io();
 const userId = document.getElementById("user-id");
 const form = document.getElementById("form");
 const input = document.getElementById("input");
+const users = document.querySelector("#users")
 
 form.addEventListener("submit", function (e) {
   e.preventDefault();
@@ -13,6 +14,21 @@ form.addEventListener("submit", function (e) {
     input.value = "";
   }
 });
+
+socket.on(SocketEvents.S2C.USER_CONNECTED, userList => {
+  //Clear user list
+  users.innerHTML = ""
+
+  // Loop through user list and adds to users
+  userList.forEach(user => {
+    const listElement = document.createElement("li")
+    listElement.classList.add("user-list-item")
+    listElement.innerHTML = `
+    <p>${user}</p>
+    `
+    users.appendChild(listElement)
+  });
+})
 
 socket.on(SocketEvents.S2C.GIVE_ID, (id) => {
   userId.textContent = id;

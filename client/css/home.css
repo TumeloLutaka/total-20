@@ -8,6 +8,20 @@ header {
   background: linear-gradient(rgb(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
 }
 
+.background-image-container {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  
+  
+  background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
+    url("../images/home-background.jpg");
+    background-size: cover;
+    background-position: center;
+    z-index: -100;
+}
+
+
 .content-container {
   padding: 1rem;
   max-width: clamp(20rem, 90%, 37.5rem);
@@ -17,7 +31,8 @@ header {
 
 .content-wrapper {
   display: grid;
-  gap: 1rem;
+  grid-template-rows: auto auto; /* ← key fix */
+  gap: var(--sizing-x-sm);
 }
 
 .home-page {
@@ -25,8 +40,6 @@ header {
   grid-template-rows: auto;
   width: 100%;
   min-height: 100vh;
-  background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
-    url("../images/home-background.jpg");
 }
 
 .header__text {
@@ -39,6 +52,35 @@ header {
   font-weight: 600;
   color: var(--col-white);
   margin-bottom: .5rem;
+}
+
+.user-list {
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+.user-list::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.user-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.user-list::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+}
+
+.user-list::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+
+.user-list-item {
+  text-align: left;
+  color: white;
+  font-size:600;
 }
 
 .wr__home-content-left,
@@ -57,4 +99,8 @@ header {
 
 .wr__home-content-left p {
   color: var(--col-white-80);
+}
+
+.wr__home-content-right {
+  align-self: start;
 }

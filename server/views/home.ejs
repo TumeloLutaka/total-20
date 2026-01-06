@@ -1,20 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Total Twenty - Home</title>
-    <link rel="stylesheet" href="/css/reset.css" />
-    <link rel="stylesheet" href="/css/main.css" />
-    <link rel="stylesheet" href="/css/home.css" />
-  </head>
-  <body>
-    <div class="background-image-blur home-page">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Total Twenty - Home</title>
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/home.css" />
+  <link rel="stylesheet" href="/css/home-tablet.css" />
+</head>
+
+<body>
+  <div class="background-image-blur background-image-container"></div>
+  <div class="home-page">
     <header>
-      <h1 class="header__text">Welcome, <%= user.name %></h1>
+      <h1 class="header__text">Welcome, <%= user.name %>
+      </h1>
 
       <form action="/logout?_method=DELETE" method="POST">
-        <button class="btn-glass" type="submit">Log Out</button>
+        <button class="btn btn-secondary" type="submit">Log Out</button>
       </form>
     </header>
 
@@ -25,11 +30,7 @@
           <p>ID: <span id="user-id"></span></p>
           <form id="form" action="">
             <div class="input-box">
-              <input
-                id="input"
-                autocomplete="off"
-                placeholder="Enter a room code"
-              />
+              <input id="input" autocomplete="off" placeholder="Enter a room code" />
             </div>
             <div class="input-box">
               <input type="submit" value="Create or Join Room" />
@@ -39,17 +40,18 @@
 
         <div class="wr__home-content-right">
           <h2 class="text__users-header">Online Users</h2>
-          <ul id="messages">
-            <li>
-              <p class="user_message">user 1</p>
+          <ul class="user-list" id="users">
+            <li class="user-list-item">
+              <p>Loading...</p>
             </li>
           </ul>
         </div>
       </div>
     </div>
 
-    </div>
-    <script src="/socket.io/socket.io.js"></script>
-    <script type="module" src="/index.js"></script>
-  </body>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="/index.js"></script>
+</body>
+
 </html>
