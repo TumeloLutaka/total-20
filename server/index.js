@@ -1,5 +1,6 @@
 if (process.env.NODE_ENV !== "production") {
-  await import("dotenv/config");
+  // REPLACE IT WITH THIS:
+require('dotenv').config();
 }
 
 import express from "express";
