@@ -21,8 +21,8 @@ import flash from "connect-flash";
 import { socketHandler } from "./src/socketConfig.js";
 import gameManager from "./src/GameManager.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __filename_ = fileURLToPath(import.meta.url);
+const __dirname_ = dirname(__filename_);
 // Users databse
 const users = [];
 
@@ -103,7 +103,7 @@ io.use((socket, next) => {
 });
 
 app.set("view engine", "ejs");
-app.set("views", `${__dirname}/views`);
+app.set("views", `${__dirname_}/views`);
 
 app.get("/", (req, res) => {
   if (req.isAuthenticated()) {
