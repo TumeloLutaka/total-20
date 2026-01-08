@@ -1,0 +1,11 @@
+[build]
+  # This tells Netlify where your frontend assets live
+  publish = "client"
+  # This tells Netlify where your Node.js code lives
+  functions = "server"
+
+[functions]
+  # Forces Netlify to bundle your dependencies (like ejs) into the function
+  node_bundle = true
+  # Ensures the server can find your EJS files
+  included_files = ["server/views/**"]
