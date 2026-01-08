@@ -1,11 +1,18 @@
 [build]
-  # This tells Netlify where your frontend assets live
   publish = "client"
-  # This tells Netlify where your Node.js code lives
   functions = "server"
 
 [functions]
-  # Forces Netlify to bundle your dependencies (like ejs) into the function
-  node_bundle = true
-  # Ensures the server can find your EJS files
+  # This tells Netlify which files to zip up with your function
   included_files = ["server/views/**"]
+  # This external_node_modules list ensures ejs is bundled correctly
+  external_node_modules = ["ejs"]
+
+[functions.index]
+  # This targets your server/index.js specifically
+  node_bundle = true
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/index"
+  status = 200
