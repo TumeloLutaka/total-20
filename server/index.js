@@ -1,8 +1,10 @@
 if (process.env.NODE_ENV !== "production") {
-  // REPLACE IT WITH THIS:
-require('dotenv').config();
+  try {
+    require('dotenv').config();
+  } catch (e) {
+    console.log("Dotenv not found, skipping...");
+  }
 }
-
 import express from "express";
 import { createServer } from "node:http";
 import { dirname } from "node:path";
