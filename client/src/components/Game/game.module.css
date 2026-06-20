@@ -1,0 +1,153 @@
+.game {
+  /* Colors  */
+  --_clr-background-main: oklch(20.157% 0.02302 268.859);
+  --_clr-background-dark: oklch(
+    from var(--_clr-background-main) calc(l * 0.5) c h
+  );
+  --_clr-background-light: oklch(
+    from var(--_clr-background-main) calc(l * 1.7) c h
+  );
+
+  --clr-white: white;
+
+  --_clr-text: oklch(from var(--_clr-background-main) calc(l * 1.95) c h);
+  --_clr-text-muted: oklch(from var(--_clr-background-main) calc(l * 1.7) c h);
+
+  /* background-color: red; */
+  background-color: var(--_clr-background-dark);
+  color: var(--_clr-text-muted);
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+}
+
+.game__actions {
+  display: flex;
+  gap: var(--sizing-300);
+  margin-inline: auto;
+  margin-top: var(--sizing-400);
+  width: fit-content;
+}
+
+.game__avatar {
+  --_background-clr: var(--clr-info-main);
+
+  aspect-ratio: 1;
+  border-radius: 100vw;
+  background-color: var(--_background-clr);
+  color: oklch(from var(--_background-clr) calc(l * 1.7) c h);
+  display: grid;
+  font-size: 1.25rem;
+  font-weight: bold;
+  grid-area: img;
+  max-width: 40px;
+  place-items: center;
+  width: 40px;
+}
+
+.game__board {
+  --max-width: 1110px;
+  --padding: 1rem;
+
+  background-color: var(--_clr-background-main);
+  padding: var(--padding-500);
+  width: min(var(--max-width), 100% - (var(--padding) * 2));
+}
+
+.game__btn {
+  --_background-clr: var(--_clr-background-light);
+  --_clr: oklch(from var(--_background-clr) calc(l * 1.7) c h);
+
+  background-color: var(--_background-clr);
+  border: 1px solid var(--_clr);
+  border-radius: 4px;
+  color: var(--_clr);
+  cursor: pointer;
+  padding-block: var(--sizing-300);
+  padding-inline: var(--sizing-400);
+
+  &[data-btn="ghost"] {
+    --_background-clr: transparent;
+    --_clr: oklch(from var(--_clr-background-light) calc(l * 1.7) c h);
+  }
+  &[data-btn="info"] {
+    --_background-clr: var(--clr-info-main);
+  }
+}
+
+.game__card-pile {
+  border: 2px dotted var(--_clr-background-light);
+  border-radius: 4px;
+  padding: var(--padding-300);
+}
+
+.game__card-piles-wrapper {
+  display: flex;
+  gap: var(--sizing-400);
+  margin-inline: auto;
+  width: fit-content;
+}
+
+.game__opponent-banner {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.game__play-section {
+  margin-block: var(--sizing-400);
+}
+
+.game__player-hand,
+.game__opponent-hand {
+  display: flex;
+  gap: var(--sizing-300);
+  margin-inline: auto;
+  width: fit-content;
+
+  & article {
+  }
+}
+
+.game__play-wrapper {
+  display: grid;
+  margin-block: var(--sizing-400);
+  gap: var(--sizing-400);
+}
+
+.game__player-details,
+.game__opponent-details {
+  display: grid;
+  column-gap: var(--sizing-300);
+  grid-template-areas:
+    "img name"
+    "img status";
+}
+
+.game__player-status {
+  background-color: var(--_clr-background-dark);
+  border-radius: 100vw;
+  color: var(--clr-white);
+  font-size: 12px;
+  grid-area: status;
+  text-align: center;
+}
+
+.game__phase-inidicator {
+  --_background-clr: var(--clr-info-main);
+
+  background-color: var(--_background-clr);
+  border-radius: 4px;
+  color: oklch(from var(--_background-clr) calc(l * 1.7) c h);
+  font-size: 12px;
+  margin-inline: auto;
+  padding-inline: var(--padding-400);
+  width: fit-content;
+}
+
+.game__score-indicator {
+  color: white;
+  font: var(--ty-md);
+  font-weight: bold;
+  text-align: right;
+}

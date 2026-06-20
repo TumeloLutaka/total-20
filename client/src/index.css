@@ -1,0 +1,56 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Space+Grotesk:wght@300..700&display=swap");
+
+:root {
+  /* Conversion Px to EM */
+  --pte-08: 0.5em;
+  --pte-16: 1em;
+  --pte-24: 1.5em;
+
+  /* Conversion Px to REM */
+  --ptr-08: 0.5rem;
+  --ptr-16: 1rem;
+
+  /* Colors */
+  /* ---- Background */
+
+  /* ---- Text */
+
+  /* --- Add Card Colors */
+
+  --clr-add-main: oklch(52.155% 0.20721 263.352);
+  --clr-back-main: rgb(20 20 19);
+  --clr-draw-main: rgb(56, 183, 61);
+  --clr-info-main: oklch(56.148% 0.21131 271.877);
+  --clr-sub-main: oklch(51.912% 0.15972 30.632);
+
+  /* Font Family */
+  --ff-primary: "Inter", sans-serif;
+  --ff-secondary: "Space Grotesk", sans-serif;
+
+  /* Padding */
+  --padding-300: var(--pte-08);
+  --padding-400: var(--pte-16);
+  --padding-500: var(--pte-24);
+
+  /* Radius */
+  --radius-300: var(--ptr-08);
+
+  /* Spacing */
+  --sizing-300: var(--ptr-08);
+  --sizing-400: var(--ptr-16);
+
+  /* Typography */
+  --ty-base: 0.875rem/1.5 var(--ff-primary);
+  --ty-md: 1.125rem/1.5 var(--ff-primary);
+}
+
+/* ============================================================= */
+/* GENERAL */
+/* ============================================================= */
+body {
+  color: var(--clr-text);
+  font: var(--ty-base);
+}
+li {
+  list-style-type: none;
+}

@@ -1,0 +1,63 @@
+.card {
+  --_front-background-color: var(--clr-draw-main);
+
+  cursor: pointer;
+  display: grid;
+  perspective: 500px;
+  place-items: center;
+
+  &[data-flipped="back"] .card__content {
+    transform: rotateY(0.5turn);
+  }
+  &[data-hidden="true"] .card__content {
+    opacity: 0;
+  }
+
+  &[data-type="blue"] {
+    --_front-background-color: var(--clr-add-main);
+  }
+  &[data-type="red"] {
+    --_front-background-color: var(--clr-sub-main);
+  }
+}
+
+.card__content {
+  aspect-ratio: 1 / 1.4;
+  max-width: 40px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.8s;
+  width: 40px;
+}
+
+.card__back {
+  --_background-color: var(--clr-back-main);
+
+  transform: rotateY(0.5turn);
+  & img {
+    width: 70%;
+  }
+}
+
+.card__front {
+  --_background-color: var(--_front-background-color);
+
+  font-family: var(--ff-secondary);
+  font-size: 150%;
+}
+
+.card__front,
+.card__back {
+  --_border-color: oklch(from var(--_background-color) calc(l * 2) c h);
+
+  background-color: var(--_background-color);
+  border: 1px solid var(--_border-color);
+  color: var(--_border-color);
+  display: grid;
+  backface-visibility: hidden;
+  border-radius: 4px;
+  place-items: center;
+  position: absolute;
+  inset: 0;
+  text-align: center;
+}
