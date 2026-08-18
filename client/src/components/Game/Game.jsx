@@ -17,9 +17,12 @@ export default function Game({ socket }) {
   const isGameOver = gameState.phase === GamePhases.OVER;
   const navigate = useNavigate();
 
+  const audioRef = useRef(null);
   const ghostCardRef = useRef(null);
   const opponentPileRef = useRef(null);
   const playerPileRef = useRef(null);
+
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     const handleUnload = () => {
@@ -33,6 +36,31 @@ export default function Game({ socket }) {
       socket.emit("leave-match", { matchKey });
     };
   }, [matchKey]);
+
+  useEffect(() => {
+    audioRef.current = new Audio("/audio/music/game-loop-1.mp3");
+    audioRef.current.loop = true;
+    audioRef.current.volume = 0.3;
+
+    const playAudio = async () => {
+      try {
+        await audioRef.current.play();
+        setIsPlaying(true);
+      } catch (err) {
+        // Autoplay was blocked by browser policy
+        console.warn("Autoplay blocked. Waiting for user interaction.", err);
+        setIsPlaying(false);
+      }
+    };
+
+    playAudio(); // 3. Cleanup: Stop music when leaving the component/page
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   // ---- FUNCTIONS ---------------------------------------------\\
   const handleLeaveMatch = () => {
@@ -93,6 +121,18 @@ export default function Game({ socket }) {
     socket.emit("player-action", { action, data });
   };
 
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play();
+      setIsPlaying(true);
+    }
+  };
+
   // ---- RENDERING ---------------------------------------------\\
   return (
     <main className={classes["game"]}>
@@ -150,7 +190,8 @@ export default function Game({ socket }) {
                 />
               </div>
 
-              {<Card ref={ghostCardRef} side="back" />}
+              {/* CENTER PILE + GHOST CARD STACK */}
+              <Card ref={ghostCardRef} side="back" />
               <GhostCard
                 animState={animState}
                 ghostCardRef={ghostCardRef}
@@ -216,6 +257,16 @@ export default function Game({ socket }) {
           </button>
         </section>
       </div>
+
+      {/* Recommended: Mute/Unmute toggle for user control */}
+      <button
+        className={classes["game__btn"]}
+        data-btn={isPlaying ? "" : "info"}
+        onClick={togglePlay}
+        style={{ position: "absolute", top: "1rem" }}
+      >
+        {isPlaying ? "🔊 Mute Music" : "🔇 Play Music"}
+      </button>
     </main>
   );
 }
@@ -246,8 +297,8 @@ function GameOverPopup({ gameOverReason, onReturnHome, player, opponent }) {
         </div>
 
         <button
-          data-btn="info"
           className={classes["game__btn"]}
+          data-btn="info"
           onClick={onReturnHome}
         >
           Return to Lobby
@@ -284,12 +335,14 @@ function PlayerBanner({
           name={userName}
           playerNumber={playerNumber}
         />
-        <p style={{ gridArea: "name" }}>{userName}</p>
+        <p style={{ color: "var(--clr-background-main)", gridArea: "name" }}>
+          {userName}
+        </p>
         <p className={classes["game__player-status"]}>{userState}</p>
       </div>
       <div>
         <p className={classes["game__score-indicator"]}>{userScore} </p>
-        <p>
+        <p style={{ color: "var(--clr-background-dark)" }}>
           {userPoints} pt{userPoints > 1 ? "s" : ""}
         </p>
       </div>

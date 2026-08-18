@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Card from "./Card";
 
 export default function GhostCard({
@@ -12,15 +12,21 @@ export default function GhostCard({
   const [side, setSide] = useState("back");
   const [style, setStyle] = useState({ position: "fixed", opacity: 0 });
 
+  // Preload the audio instance once per card lifecycle
+  const flipSfxRef = useRef(new Audio("/audio/sfx/card-flick.wav"));
+  const placeSfxRef = useRef(new Audio("/audio/sfx/card-placement.wav"));
+
   useEffect(() => {
     if (animState?.animationType !== "DRAW_CARD") return;
 
+    const parentRect =
+      ghostCardRef.current.offsetParent.getBoundingClientRect();
     const from = ghostCardRef.current.getBoundingClientRect();
 
     setStyle({
-      left: from.left,
-      position: "fixed",
-      top: from.top,
+      left: from.left - parentRect.left,
+      position: "absolute",
+      top: from.top - parentRect.top,
       width: from.width,
       height: from.height,
       transition: "none",
@@ -36,6 +42,13 @@ export default function GhostCard({
   const handleTransitionEnd = (e) => {
     // Only fire when the flight position finishes moving
     if (e.propertyName === "left") {
+      // Play SFX on flip completion
+      if (placeSfxRef.current) {
+        placeSfxRef.current.volume = 0.4;
+        placeSfxRef.current.currentTime = 0; // Reset for rapid flips
+        placeSfxRef.current.play().catch(() => {});
+      }
+
       animState.notifyAnimationComplete();
 
       setStyle((prev) => {
@@ -46,19 +59,29 @@ export default function GhostCard({
   };
 
   const handleFlipEnd = () => {
-    // Figure out who is drawing, player or opponent.
     const selectedPileRef = animState.isPlayerAction
       ? playerPileRef
       : opponentPileRef;
 
-    const to = selectedPileRef.current.getBoundingClientRect();
+    // Get both target pile rect AND shared offsetParent rect
+    const targetEl = selectedPileRef.current;
+    const parentEl = ghostCardRef.current.offsetParent || document.body;
+
+    const to = targetEl.getBoundingClientRect();
+    const parentRect = parentEl.getBoundingClientRect();
+
+    if (flipSfxRef.current) {
+      flipSfxRef.current.volume = 0.4;
+      flipSfxRef.current.currentTime = 0;
+      flipSfxRef.current.play().catch(() => {});
+    }
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         setStyle((s) => ({
           ...s,
-          left: to.left,
-          top: to.top,
+          left: `${to.left - parentRect.left}px`, // <--- Subtracted parentRect!
+          top: `${to.top - parentRect.top}px`, // <--- Subtracted parentRect!
           transition:
             "left 320ms ease-out, top 320ms ease-out, transform 320ms ease-out",
         }));

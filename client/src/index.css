@@ -61,6 +61,9 @@
   --ty-heading-1: bold 1.25rem/1.5 var(--ff-primary);
   --ty-heading-2: bold 1.125rem/1.5 var(--ff-primary);
   --ty-heading-3: 1.125rem/1.5 var(--ff-primary);
+
+  /* Globals */
+  --card-width: 40px;
 }
 
 /* ============================================================= */

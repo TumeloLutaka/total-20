@@ -1,3 +1,6 @@
+/* ============================================================= */
+/* GENERAL */
+/* ============================================================= */
 .game {
   /* Colors  */
   --_clr-background-main: oklch(20.157% 0.02302 268.859);
@@ -20,7 +23,10 @@
   /* Semantic Colors */
   --_clr-success: green;
 
-  background-color: var(--_clr-background-dark);
+  /* background-color: var(--_clr-background-dark); */
+  background-image: url("/images/game-background.png");
+  background-size: cover;
+  background-repeat: no-repeat;
   color: var(--_clr-text-muted);
   display: grid;
   place-items: center;
@@ -59,9 +65,15 @@
   --max-width: 1110px;
   --padding: 1rem;
 
-  background-color: var(--_clr-background-main);
+  background-color: oklch(from var(--_clr-background-main) l c h / 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgb(255, 255, 255, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   padding: var(--padding-500);
+  position: relative;
   width: min(var(--max-width), 100% - (var(--padding) * 2));
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .game__btn {
@@ -86,7 +98,7 @@
 }
 
 .game__card-pile {
-  border: 2px dotted var(--_clr-background-light);
+  border: 2px dotted white;
   border-radius: 4px;
   padding: var(--padding-300);
 }
