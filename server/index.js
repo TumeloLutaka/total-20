@@ -18,7 +18,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: [VITE_SOCKET_URL, "http://localhost:5173"],
     method: ["GET", "POST"],
   },
 });
@@ -51,7 +51,7 @@ io.on("connection", (socket) => {
   gameHandler(socket);
 });
 
-const PORT = 5174;
+const PORT = process.env.PORT || 5173;
 server.listen(PORT, () => {
   console.log("Server is running on port: " + PORT);
 });
