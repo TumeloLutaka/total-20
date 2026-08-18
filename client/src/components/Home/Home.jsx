@@ -13,7 +13,7 @@ export default function Home({ data, socket }) {
 
   const navigate = useNavigate();
   useEffect(() => {
-    console.log(socket.data);
+    socket.emit("get-user-data");
 
     socket.on("match-created", (matchKey) => setMatchKey(matchKey));
     socket.on("match-error", (message) => alert(message));
@@ -26,7 +26,6 @@ export default function Home({ data, socket }) {
       console.log(data.message);
       navigate("/game-board/" + data.matchKey);
     });
-
     socket.on("user-data", ({ user }) => {
       console.log(user);
       setUser(user);

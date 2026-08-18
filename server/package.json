@@ -11,6 +11,7 @@
     "start": "nodemon index.js"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.6.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "nodemon": "^3.1.14",

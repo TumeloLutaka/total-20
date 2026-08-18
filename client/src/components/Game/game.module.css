@@ -164,6 +164,7 @@
 .game__opponent-details {
   display: grid;
   column-gap: var(--sizing-300);
+  row-gap: var(--sizing-300);
   grid-template-areas:
     "img name"
     "img status";

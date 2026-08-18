@@ -37,6 +37,15 @@ io.on("connection", (socket) => {
     database.deleteUser(socket.id);
   });
 
+  socket.on("get-user-data", () => {
+    // Retrieve the user object linked to this socket instance
+    const currentUser = database.getUser(socket.id);
+
+    if (currentUser) {
+      socket.emit("user-data", { user: currentUser });
+    }
+  });
+
   matchHandler(socket);
 
   gameHandler(socket);

@@ -1,3 +1,5 @@
+import { faker } from "@faker-js/faker";
+
 import Game from "./Game.js";
 
 const MockDB = {
@@ -10,12 +12,16 @@ const MockDB = {
   users: [
     // { userName: "Testing-001" }
   ],
-  addUser({ socketId }) {
-    const formatted = String(this.users.length + 1).padStart(3, "0");
 
+  /* ============================================================= */
+  /* FUNCTIONS */
+  /* ============================================================= */
+  addUser({ socketId }) {
+    const assignedName =
+      `${faker.word.adjective()}-${faker.animal.type()}`.toLowerCase();
     const newUser = {
       socketId: socketId,
-      userName: "Guest-" + formatted,
+      userName: assignedName,
     };
 
     this.users.push(newUser);

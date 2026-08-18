@@ -148,9 +148,10 @@ main {
   --_background-color: var(--clr-primary-main);
 
   background-color: var(--_background-color);
-  border: 2px solid oklch(from var(--_background-color) calc(l * 0.75) c h);
+  /* border: 2px solid oklch(from var(--_background-color) calc(l * 0.75) c h); */
+  border: none;
   border-radius: 8px;
-  color: oklch(from var(--_background-color) calc(l * 0.75) c h);
+  color: oklch(from var(--_background-color) calc(l * 1.75) c h);
   cursor: pointer;
   font-weight: 500;
   padding-block: var(--padding-300);

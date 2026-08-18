@@ -335,7 +335,13 @@ function PlayerBanner({
           name={userName}
           playerNumber={playerNumber}
         />
-        <p style={{ color: "var(--clr-background-main)", gridArea: "name" }}>
+        <p
+          style={{
+            color: "var(--clr-background-main)",
+            font: "var(--ty-base)",
+            gridArea: "name",
+          }}
+        >
           {userName}
         </p>
         <p className={classes["game__player-status"]}>{userState}</p>
