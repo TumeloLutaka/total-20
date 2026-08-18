@@ -33,7 +33,7 @@ export default function PlayCard({
           ...prev,
           left: to.left,
           top: to.top,
-          transition: "left 800ms ease-out, top 800ms ease-out",
+          transition: "left 500ms ease-out, top 500ms ease-out",
         }));
       });
     });

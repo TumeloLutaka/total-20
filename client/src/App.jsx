@@ -1,16 +1,17 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
 import io from "socket.io-client";
-import Home from "./components/Home";
-import { useState } from "react";
-import Game from "./components/Game/Game";
 const socket = io.connect("http://localhost:5174");
+
+import Home from "./components/Home/Home";
+import Game from "./components/Game/Game";
 
 function App() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
     socket.on("update_users", (data) => {
+      console.log(data);
       setData(data);
     });
   }, [data, socket]);

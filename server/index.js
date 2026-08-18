@@ -24,53 +24,20 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  database.addUser({ socketId: socket.id });
+  const user = database.addUser({ socketId: socket.id });
+  socket.emit("user-data", { user });
+
   io.emit("update_users", {
     rooms: database.getMatches(),
     users: database.getUsers(),
   });
 
-  socket.on("create_match", () => {
-    const matchKey = database.createMatch(socket.id);
-    socket.join(matchKey);
-    socket.emit("match-created", matchKey);
-
-    io.emit("update_users", {
-      rooms: database.getMatches(),
-      users: database.getUsers(),
-    });
-  });
-
   socket.on("disconnect", () => {
+    console.log("Disconnecting: ", socket.id);
     database.deleteUser(socket.id);
   });
 
-  socket.on("join-match", (matchKey) => {
-    // Clean up the input key
-    const cleanKey = matchKey.trim().toUpperCase();
-    //Check if room actually exists/has active users
-    const room = io.sockets.adapter.rooms.get(cleanKey);
-
-    if (!room) {
-      return socket.emit("match-error", "Match Not Found");
-    }
-
-    // CRITICAL FOR 1v1: check room capacity
-    if (room.size >= 2) {
-      return socket.emit("match-error", "This match is already full!");
-    }
-
-    socket.join(cleanKey);
-    socket.emit("match-joined", { matchKey, playerNumber: 2 });
-
-    database.joinMatch(cleanKey, socket.id);
-
-    // Tell both players teh match is ready to start!
-    io.to(cleanKey).emit("match-ready", {
-      message: "Both players connected.",
-      matchKey: cleanKey,
-    });
-  });
+  matchHandler(socket);
 
   gameHandler(socket);
 });
@@ -83,6 +50,31 @@ server.listen(PORT, () => {
 // ======================================================== \\
 // FUNCTIONS
 // ======================================================== \\
+function cleanupMatch(matchKey) {
+  // Boot all sockets from the room
+  const room = io.sockets.adapter.rooms.get(matchKey);
+  if (room) {
+    for (const socketId of room) {
+      const s = io.sockets.sockets.get(socketId);
+      if (s) s.leave(matchKey);
+    }
+  }
+
+  database.deleteMatch(matchKey);
+  io.emit("update_users", {
+    rooms: database.getMatches(),
+    users: database.getUsers(),
+  });
+}
+
+function dualEmit(event, matchKey) {
+  if (event === null) {
+    io.to(matchKey).emit("match-error", "Event creation error");
+    return;
+  }
+  io.to(matchKey).emit("game-event", event);
+}
+
 function gameHandler(socket) {
   socket.on("init-game", (matchKey) => {
     // Get match the player belongs to.
@@ -124,12 +116,60 @@ function gameHandler(socket) {
   });
 }
 
-function dualEmit(event, matchKey) {
-  if (event === null) {
-    io.to(matchKey).emit("match-error", "Event creation error");
-    return;
-  }
-  io.to(matchKey).emit("game-event", event);
+function matchHandler(socket) {
+  socket.on("create_match", () => {
+    const matchKey = database.createMatch(socket.id);
+    socket.join(matchKey);
+    socket.emit("match-created", matchKey);
+
+    io.emit("update_users", {
+      rooms: database.getMatches(),
+      users: database.getUsers(),
+    });
+  });
+
+  socket.on("leave-match", ({ matchKey }) => {
+    console.log("LEAVING MATCH");
+
+    const match = database.getMatch(matchKey);
+    if (!match) return;
+
+    // Notify the opponent
+    socket.to(matchKey).emit("game-event", {
+      type: "OPPONENT_LEFT",
+      payload: { matchKey },
+    });
+
+    socket.leave(matchKey);
+    setTimeout(() => cleanupMatch(matchKey), 3000);
+  });
+
+  socket.on("join-match", (matchKey) => {
+    // Clean up the input key
+    const cleanKey = matchKey.trim().toUpperCase();
+    //Check if room actually exists/has active users
+    const room = io.sockets.adapter.rooms.get(cleanKey);
+
+    if (!room) {
+      return socket.emit("match-error", "Match Not Found");
+    }
+
+    // CRITICAL FOR 1v1: check room capacity
+    if (room.size >= 2) {
+      return socket.emit("match-error", "This match is already full!");
+    }
+
+    socket.join(cleanKey);
+    socket.emit("match-joined", { matchKey, playerNumber: 2 });
+
+    database.joinMatch(cleanKey, socket.id);
+
+    // Tell both players teh match is ready to start!
+    io.to(cleanKey).emit("match-ready", {
+      message: "Both players connected.",
+      matchKey: cleanKey,
+    });
+  });
 }
 
 function playerTriggedEventActionHandling(action, data, game, socket) {
@@ -246,11 +286,12 @@ function playerTriggedEventActionHandling(action, data, game, socket) {
       socket.emit("game-event", {
         type: "PLAY_CARD",
         payload: {
+          hand: hand,
           newScoreTotal: score,
           phase: game.phase,
           playedCard,
           playerNumber,
-          hand: hand,
+          state: game.currentPlayer.state,
         },
       });
 
@@ -258,11 +299,12 @@ function playerTriggedEventActionHandling(action, data, game, socket) {
       socket.to(opponent.socketId).emit("game-event", {
         type: "PLAY_CARD",
         payload: {
+          hand: game.currentPlayer.getHandIds(),
           newScoreTotal: score,
           phase: game.phase,
           playedCard,
           playerNumber,
-          hand: game.currentPlayer.getHandIds(),
+          state: game.currentPlayer.state,
         },
       });
 
@@ -404,6 +446,9 @@ function systemTriggeredEventActionHandling(action, game) {
         };
 
         dualEmit(event, action.matchKey);
+
+        // Schdeula cleanup after clients have time to recieve the event
+        setTimeout(() => cleanupMatch(action.matchKey), 3000);
         break;
       }
 

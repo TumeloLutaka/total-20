@@ -39,7 +39,7 @@ export default function OppCard({ animState, cardId, opponentPileRef }) {
           left: to.left,
           top: to.top,
           transition:
-            "left 800ms ease-out, top 800ms ease-out, transform 800ms ease-out",
+            "left 500ms ease-out, top 500ms ease-out, transform 500ms ease-out",
         }));
       });
     });

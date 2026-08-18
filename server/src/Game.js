@@ -122,7 +122,11 @@ export default class Game {
     );
 
     const modifier = playedCard.type === "blue" ? 1 : -1;
-    this.currentPlayer.score += playedCard.number * modifier;
+    const newScore = Math.max(
+      0,
+      this.currentPlayer.score + playedCard.number * modifier,
+    );
+    this.currentPlayer.score = newScore;
 
     this.evaluatePlayerState();
     return playedCard;

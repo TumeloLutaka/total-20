@@ -28,7 +28,17 @@ export default function Card({
         className={classes["card__content"]}
         onTransitionEnd={handleTransitionEnd}
       >
-        <div className={classes["card__front"]}>{number}</div>
+        <div className={classes["card__front"]}>
+          <span>
+            {type === "red" ? "-" : "+"}
+            {number}
+          </span>
+          <span>{number}</span>
+          <span>
+            {type === "red" ? "-" : "+"}
+            {number}
+          </span>
+        </div>
         <div className={classes["card__back"]}>
           <img src="/images/logo.svg" />
         </div>

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 import { useGameEvents } from "../../hooks/useGameEvents";
 import { GamePhases } from "../../../../Shared/enums";
@@ -14,13 +14,33 @@ export default function Game({ socket }) {
   let params = useParams();
   const matchKey = params.matchKey;
   const { animState, gameState } = useGameEvents(socket, matchKey);
-  const [flight, setFlight] = useState(null);
+  const isGameOver = gameState.phase === GamePhases.OVER;
+  const navigate = useNavigate();
 
   const ghostCardRef = useRef(null);
   const opponentPileRef = useRef(null);
   const playerPileRef = useRef(null);
 
+  useEffect(() => {
+    const handleUnload = () => {
+      socket.emit("leave-match", { matchKey });
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleUnload);
+      socket.emit("leave-match", { matchKey });
+    };
+  }, [matchKey]);
+
   // ---- FUNCTIONS ---------------------------------------------\\
+  const handleLeaveMatch = () => {
+    // Fires when component unmounts
+    socket.emit("leave-match", { matchKey: matchKey });
+    navigate("/");
+  };
+
   const handlePlayCard = (cardId) => {
     handlePlayerAction("PLAY_CARD", { cardId: cardId });
   };
@@ -76,8 +96,18 @@ export default function Game({ socket }) {
   // ---- RENDERING ---------------------------------------------\\
   return (
     <main className={classes["game"]}>
+      {isGameOver && (
+        <GameOverPopup
+          gameOverReason={gameState.gameOverReason}
+          onReturnHome={handleLeaveMatch}
+          player={gameState.player}
+          opponent={gameState.opponent}
+        />
+      )}
+
       <div className={classes["game__board"]}>
         <PlayerBanner
+          playerNumber={gameState.opponent.playerNumber}
           userName={gameState.opponent.userName}
           userPoints={gameState.opponent.points}
           userScore={gameState.opponent.score}
@@ -101,7 +131,10 @@ export default function Game({ socket }) {
           </ul>
 
           <div className={classes["game__play-wrapper"]}>
-            <div className={classes["game__phase-inidicator"]}>
+            <div
+              data-player={gameState.currentPlayerNumber}
+              className={classes["game__phase-inidicator"]}
+            >
               <p>
                 Player {`${gameState.currentPlayerNumber}`} - {gameState.phase}
               </p>
@@ -153,6 +186,7 @@ export default function Game({ socket }) {
         </section>
 
         <PlayerBanner
+          playerNumber={gameState?.player?.playerNumber}
           userName={gameState?.player?.userName}
           userPoints={gameState?.player?.points}
           userScore={gameState?.player?.score}
@@ -186,17 +220,70 @@ export default function Game({ socket }) {
   );
 }
 
-function PlayerAvatar({ name = "?" }) {
+function GameOverPopup({ gameOverReason, onReturnHome, player, opponent }) {
+  const messages = {
+    match_end: { title: "Game Over", sub: "The match has ended." },
+    opponent_left: {
+      title: "Opponent Left",
+      sub: "Your opponent disconnected.",
+    },
+  };
+
+  const { title, sub } = messages[gameOverReason] ?? messages.match_end;
+
   return (
-    <p className={classes["game__avatar"]}>{name.charAt(0).toUpperCase()}</p>
+    <div className={classes["game__overlay"]}>
+      <div className={classes["game__popup"]}>
+        <p className={classes["game__popup-title"]}>{title}</p>
+        <p className={classes["game__popup-reason"]}>{sub}</p>
+
+        <div className={classes["game__popup-scores"]}>
+          <ScoreCard player={opponent} />
+          <p style={{ color: "white", fontSize: "20px", fontWeight: "bold" }}>
+            VS
+          </p>
+          <ScoreCard player={player} />
+        </div>
+
+        <button
+          data-btn="info"
+          className={classes["game__btn"]}
+          onClick={onReturnHome}
+        >
+          Return to Lobby
+        </button>
+      </div>
+    </div>
   );
 }
 
-function PlayerBanner({ userName, userPoints, userScore, userState }) {
+function PlayerAvatar({ fontSize = "20px", name = "?", playerNumber }) {
+  return (
+    <div
+      data-player={playerNumber}
+      className={classes["game__avatar"]}
+      style={{ fontSize: `${fontSize}` }}
+    >
+      {name.charAt(0).toUpperCase()}
+    </div>
+  );
+}
+
+function PlayerBanner({
+  playerNumber,
+  userName,
+  userPoints,
+  userScore,
+  userState,
+}) {
   return (
     <section className={classes["game__opponent-banner"]}>
       <div className={classes["game__player-details"]}>
-        <PlayerAvatar name={userName} />
+        <PlayerAvatar
+          fontSize="25px"
+          name={userName}
+          playerNumber={playerNumber}
+        />
         <p style={{ gridArea: "name" }}>{userName}</p>
         <p className={classes["game__player-status"]}>{userState}</p>
       </div>
@@ -207,5 +294,26 @@ function PlayerBanner({ userName, userPoints, userScore, userState }) {
         </p>
       </div>
     </section>
+  );
+}
+
+function ScoreCard({ player }) {
+  return (
+    <div
+      data-winner={player?.points >= 2}
+      className={classes["game__popup-score-card"]}
+    >
+      <p className={classes["game__popup-score-designation"]}>
+        P{player?.playerNumber}
+      </p>
+      <PlayerAvatar
+        name={player?.userName}
+        playerNumber={player?.playerNumber}
+      />
+      <p className={classes["game__popup-score-name"]}>{player?.userName}</p>
+      <span className={classes["game__popup-score-points"]}>
+        {player?.points}
+      </span>
+    </div>
   );
 }

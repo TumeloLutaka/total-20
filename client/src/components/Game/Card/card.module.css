@@ -26,7 +26,7 @@
   max-width: 40px;
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 0.8s;
+  transition: transform 0.5s;
   width: 40px;
 }
 
@@ -42,8 +42,23 @@
 .card__front {
   --_background-color: var(--_front-background-color);
 
+  display: grid;
+  grid-template-rows: auto 1fr auto;
   font-family: var(--ff-secondary);
-  font-size: 150%;
+  padding: 4px;
+
+  & > :nth-child(1) {
+    justify-self: flex-start;
+    font-size: 40%;
+  }
+  & > :nth-child(2) {
+    font-size: 110%;
+  }
+  & > :nth-child(3) {
+    transform: rotateZ(180deg);
+    font-size: 40%;
+    justify-self: flex-end;
+  }
 }
 
 .card__front,

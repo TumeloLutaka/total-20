@@ -4,9 +4,11 @@ import { GamePhases, PlayerState } from "../../../Shared/enums";
 
 const initialGameState = {
   currentPlayerNumber: 1,
+  gameOverReason: null,
   opponent: {
     hand: [],
     pileTopCard: null,
+    playerNumber: null,
     points: 0,
     score: 0,
     state: PlayerState.LIVE,
@@ -49,7 +51,7 @@ export function useGameEvents(socket, matchKey) {
     isProcessing.current = true;
     const nextEvent = eventQueue.current.shift();
     console.log(nextEvent);
-    await playAnimation(nextEvent, 1500);
+    await playAnimation(nextEvent, 1000);
     playEvent(nextEvent);
     processNextEvent();
   };
@@ -99,6 +101,7 @@ export function useGameEvents(socket, matchKey) {
           opponent: {
             ...prev.opponent,
             hand: payload.opponent.hand,
+            playerNumber: playerNumberRef.current === 1 ? 2 : 1,
             userName: payload.opponent.userName,
           },
           phase: payload.phase,
@@ -124,7 +127,11 @@ export function useGameEvents(socket, matchKey) {
       }
 
       case "MATCH_END": {
-        setGameState((prev) => ({ ...prev, phase: GamePhases.OVER }));
+        setGameState((prev) => ({
+          ...prev,
+          gameOverReason: "match_end",
+          phase: GamePhases.OVER,
+        }));
         break;
       }
 
@@ -134,6 +141,18 @@ export function useGameEvents(socket, matchKey) {
           currentPlayerNumber: payload.currentPlayerNumber,
           phase: payload.phase,
         }));
+        break;
+      }
+
+      case "OPPONENT_DISCONNECTED":
+      case "OPPONENT_LEFT": {
+        setGameState((prev) => {
+          return {
+            ...prev,
+            gameOverReason: "opponent_left",
+            phase: GamePhases.OVER,
+          };
+        });
         break;
       }
 
@@ -149,9 +168,10 @@ export function useGameEvents(socket, matchKey) {
             ...prev,
             [key]: {
               ...prev[key],
-              score: payload.newScoreTotal,
               hand: payload.hand,
               pileTopCard: payload.playedCard,
+              score: payload.newScoreTotal,
+              state: payload.state,
             },
             phase: payload.phase,
           };
@@ -216,6 +236,14 @@ export function useGameEvents(socket, matchKey) {
       }
 
       case "GAME_INIT": {
+        return new Promise((resolve) => {
+          resolve();
+        });
+        break;
+      }
+
+      case "OPPONENT_LEFT":
+      case "OPPONENT_DISCONNECTED": {
         return new Promise((resolve) => {
           resolve();
         });
