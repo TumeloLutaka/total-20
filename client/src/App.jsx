@@ -6,15 +6,16 @@ import Game from "./components/Game/Game";
 import Home from "./components/Home/Home";
 
 // Vite env variable fallback
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
 const socket = io(SOCKET_URL, { autoConnect: true });
+
+console.log(socket);
 
 function App() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
     function handleUpdateUsers(newData) {
-      console.log(newData);
       setData(newData);
     }
 

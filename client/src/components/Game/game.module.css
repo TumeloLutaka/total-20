@@ -239,7 +239,8 @@
 
 .game__popup-scores {
   align-items: center;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   gap: var(--sizing-300);
   justify-content: center;
   width: 100%;
@@ -257,4 +258,106 @@
   font: var(--ty-md);
   font-weight: bold;
   font-size: 1.5rem;
+}
+
+@keyframes roundWonToPlayer {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.85);
+  }
+
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1.08);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(0) scale(0.98);
+  }
+
+  60% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(38vh) scale(0.65);
+  }
+}
+
+@keyframes roundWonToOpponent {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.85);
+  }
+
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1.08);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(0) scale(0.98);
+  }
+
+  60% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-38vh) scale(0.65);
+  }
+}
+
+.game__round-won {
+  align-items: center;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  pointer-events: none;
+  position: fixed;
+  z-index: 100;
+}
+
+.game__round-won-content {
+  color: white;
+  text-align: center;
+  text-shadow: 0 0 20px rgb(255 255 255 / 0.7);
+}
+
+.game__round-won-content[data-winner="player"] {
+  animation: roundWonToPlayer 1400ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+.game__round-won-content[data-winner="opponent"] {
+  animation: roundWonToOpponent 1400ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+.game__round-won-title {
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.game__round-won-winner {
+  font-size: 24px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.game__round-won-points {
+  font-size: 42px;
+  font-weight: 900;
+  margin-top: 10px;
+}
+
+.game__round-won-total {
+  font-size: 16px;
+  margin-top: 2px;
+  opacity: 0.8;
 }

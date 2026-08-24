@@ -125,39 +125,22 @@ export default function Home({ data, socket }) {
           {!data?.users && "Loading users..."}
           <table>
             <caption className="heading-2">Online Users</caption>
-            <tr style={{ fontWeight: "bold" }}>
-              <th>Name</th>
-              {/* <th>Invite</th> */}
-            </tr>
-            {data?.users &&
-              data.users.map((user) => (
-                <tr key={user.socketId}>
-                  <td>{user.userName}</td>
-                  <td>
-                    {/* <button className="btn" style={{ fontSize: "12px" }}>
-                      invite
-                    </button> */}
-                  </td>
-                </tr>
-              ))}
+            <thead>
+              <tr style={{ fontWeight: "bold" }}>
+                <th>Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.users &&
+                data.users.map((user) => (
+                  <tr key={user.socketId}>
+                    <td>{user.userName}</td>
+                    <td></td>
+                  </tr>
+                ))}
+            </tbody>
           </table>
         </section>
-
-        {/* <section className={`${classes["matches"]} ${classes["card"]}`}>
-          <table>
-            <caption className="heading-2">Avaliable Rooms</caption>
-            <tr>
-              <th>Room Key</th>
-            </tr>
-            {!data?.rooms && "Loading rooms..."}
-            {data?.rooms &&
-              data.rooms.map((r) => (
-                <tr>
-                  <td>{r.matchKey}</td>
-                </tr>
-              ))}
-          </table>
-        </section> */}
       </main>
     </>
   );

@@ -264,6 +264,16 @@ export function useGameEvents(socket, matchKey) {
         });
         break;
       }
+
+      case "ROUND_WON": {
+        setAnimState({
+          animationType: event.type,
+          playerNumber: payload.playerNumber,
+          points: payload.newPointsTotal,
+          isPlayerAction: payload.playerNumber === playerNumberRef.current,
+        });
+        break;
+      }
     }
 
     return new Promise((resolve, reject) => {

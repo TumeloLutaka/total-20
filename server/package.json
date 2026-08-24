@@ -13,7 +13,9 @@
   },
   "dependencies": {
     "@faker-js/faker": "^10.6.0",
+    "@upstash/redis": "^1.38.2",
     "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "nodemon": "^3.1.14",
     "socket.io": "^4.8.3"

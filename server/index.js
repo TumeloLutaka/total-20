@@ -1,6 +1,8 @@
 // ======================================================== \\
 // THIRD PARTY IMPORTS
 // ======================================================== \\
+import "dotenv/config";
+
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
@@ -16,32 +18,35 @@ const app = express();
 app.use(cors());
 const server = http.createServer(app);
 
-const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+const CLIENT_URL = process.env.CLIENT_URL;
 
 const io = new Server(server, {
   cors: {
-    origin: [CLIENT_URL, "http://localhost:5173"],
+    origin: [CLIENT_URL],
     method: ["GET", "POST"],
   },
 });
 
-io.on("connection", (socket) => {
-  const user = database.addUser({ socketId: socket.id });
+io.on("connection", async (socket) => {
+  console.log("connection: " + socket.id);
+  const user = await database.addUser({ socketId: socket.id });
+  await cleanupStaleState();
   socket.emit("user-data", { user });
 
+  const users = await database.getUsers();
+
   io.emit("update_users", {
-    rooms: database.getMatches(),
-    users: database.getUsers(),
+    users,
   });
 
-  socket.on("disconnect", () => {
+  socket.on("disconnect", async () => {
     console.log("Disconnecting: ", socket.id);
-    database.deleteUser(socket.id);
+    await cleanupStaleState();
   });
 
-  socket.on("get-user-data", () => {
+  socket.on("get-user-data", async () => {
     // Retrieve the user object linked to this socket instance
-    const currentUser = database.getUser(socket.id);
+    const currentUser = await database.getUser(socket.id);
 
     if (currentUser) {
       socket.emit("user-data", { user: currentUser });
@@ -53,7 +58,7 @@ io.on("connection", (socket) => {
   gameHandler(socket);
 });
 
-const PORT = process.env.PORT || 5173;
+const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log("Server is running on port: " + PORT);
 });
@@ -61,9 +66,16 @@ server.listen(PORT, () => {
 // ======================================================== \\
 // FUNCTIONS
 // ======================================================== \\
-function cleanupMatch(matchKey) {
-  // Boot all sockets from the room
+async function cleanupStaleState() {
+  const activeSocketIds = new Set(io.sockets.sockets.keys());
+
+  await database.cleanupStaleUsers(activeSocketIds);
+  await database.cleanupStaleMatches(activeSocketIds);
+}
+
+async function cleanupMatch(matchKey) {
   const room = io.sockets.adapter.rooms.get(matchKey);
+
   if (room) {
     for (const socketId of room) {
       const s = io.sockets.sockets.get(socketId);
@@ -71,10 +83,14 @@ function cleanupMatch(matchKey) {
     }
   }
 
-  database.deleteMatch(matchKey);
+  await database.deleteMatch(matchKey);
+
+  const users = await database.getUsers();
+  const rooms = await database.getMatches();
+
   io.emit("update_users", {
-    rooms: database.getMatches(),
-    users: database.getUsers(),
+    rooms,
+    users,
   });
 }
 
@@ -87,12 +103,11 @@ function dualEmit(event, matchKey) {
 }
 
 function gameHandler(socket) {
-  socket.on("init-game", (matchKey) => {
+  socket.on("init-game", async (matchKey) => {
     // Get match the player belongs to.
     try {
-      const match = database.getMatch(matchKey);
+      const match = await database.getMatch(matchKey);
       const game = match.game;
-
       const opponent = game.getOpponentFromSocketId(socket.id);
 
       // Create event
@@ -116,33 +131,35 @@ function gameHandler(socket) {
     }
   });
 
-  socket.on("player-action", ({ action, data }) => {
-    const game = database.getMatch(action.matchKey).game;
+  socket.on("player-action", async ({ action, data }) => {
+    const match = await database.getMatch(action.matchKey);
+    const game = match.game;
 
     // Check if the player is allowed to send an event.
     if (!game.isPlayerTurn(socket.id)) return;
 
-    playerTriggedEventActionHandling(action, data, game, socket);
-    // systemTriggeredEventActionHandling(action, game);
+    await playerTriggedEventActionHandling(action, data, game, socket);
+
+    await database.saveMatch(action.matchKey, match);
   });
 }
 
 function matchHandler(socket) {
-  socket.on("create_match", () => {
-    const matchKey = database.createMatch(socket.id);
+  socket.on("create_match", async () => {
+    const matchKey = await database.createMatch(socket.id);
     socket.join(matchKey);
     socket.emit("match-created", matchKey);
 
     io.emit("update_users", {
-      rooms: database.getMatches(),
-      users: database.getUsers(),
+      rooms: await database.getMatches(),
+      users: await database.getUsers(),
     });
   });
 
-  socket.on("leave-match", ({ matchKey }) => {
+  socket.on("leave-match", async ({ matchKey }) => {
     console.log("LEAVING MATCH");
 
-    const match = database.getMatch(matchKey);
+    const match = await database.getMatch(matchKey);
     if (!match) return;
 
     // Notify the opponent
@@ -152,10 +169,10 @@ function matchHandler(socket) {
     });
 
     socket.leave(matchKey);
-    setTimeout(() => cleanupMatch(matchKey), 3000);
+    setTimeout(async () => await cleanupMatch(matchKey), 3000);
   });
 
-  socket.on("join-match", (matchKey) => {
+  socket.on("join-match", async (matchKey) => {
     // Clean up the input key
     const cleanKey = matchKey.trim().toUpperCase();
     //Check if room actually exists/has active users
@@ -173,7 +190,7 @@ function matchHandler(socket) {
     socket.join(cleanKey);
     socket.emit("match-joined", { matchKey, playerNumber: 2 });
 
-    database.joinMatch(cleanKey, socket.id);
+    await database.joinMatch(cleanKey, socket.id);
 
     // Tell both players teh match is ready to start!
     io.to(cleanKey).emit("match-ready", {
@@ -183,7 +200,7 @@ function matchHandler(socket) {
   });
 }
 
-function playerTriggedEventActionHandling(action, data, game, socket) {
+async function playerTriggedEventActionHandling(action, data, game, socket) {
   let event = null;
   const currentPlayer = game.getCurrentPlayer();
 
@@ -199,10 +216,10 @@ function playerTriggedEventActionHandling(action, data, game, socket) {
         type: "DRAW_CARD",
         payload: {
           drawnCard: drawnCard,
-          newScoreTotal: game.currentPlayer.score,
+          newScoreTotal: currentPlayer.score,
           phase: game.phase,
-          playerNumber: game.currentPlayer.playerNumber,
-          state: game.currentPlayer.state,
+          playerNumber: currentPlayer.playerNumber,
+          state: currentPlayer.state,
         },
       };
 
@@ -235,7 +252,7 @@ function playerTriggedEventActionHandling(action, data, game, socket) {
         type: "END_TURN",
         payload: {
           phase: game.phase,
-          playerNumber: game.currentPlayer.playerNumber,
+          playerNumber: currentPlayer.playerNumber,
         },
       };
 
@@ -256,12 +273,12 @@ function playerTriggedEventActionHandling(action, data, game, socket) {
 
       // Player Locks themselves.If they reach this part of the code it means they haven't lost yet.
       // Get player and changer their state.
-      game.currentPlayer.state = PlayerState.LOCK;
+      currentPlayer.state = PlayerState.LOCK;
       // End their turn.
       event = {
         type: action.type,
         payload: {
-          currentPlayerNumber: game.currentPlayer.playerNumber,
+          currentPlayerNumber: currentPlayer.playerNumber,
         },
       };
 
@@ -291,7 +308,7 @@ function playerTriggedEventActionHandling(action, data, game, socket) {
         points,
         score,
         socketId: currentPlayerSocket,
-      } = game.currentPlayer;
+      } = currentPlayer;
 
       // Send full hand to the player who acted
       socket.emit("game-event", {
@@ -302,7 +319,7 @@ function playerTriggedEventActionHandling(action, data, game, socket) {
           phase: game.phase,
           playedCard,
           playerNumber,
-          state: game.currentPlayer.state,
+          state: currentPlayer.state,
         },
       });
 
@@ -310,12 +327,12 @@ function playerTriggedEventActionHandling(action, data, game, socket) {
       socket.to(opponent.socketId).emit("game-event", {
         type: "PLAY_CARD",
         payload: {
-          hand: game.currentPlayer.getHandIds(),
+          hand: currentPlayer.getHandIds(),
           newScoreTotal: score,
           phase: game.phase,
           playedCard,
           playerNumber,
-          state: game.currentPlayer.state,
+          state: currentPlayer.state,
         },
       });
 
@@ -332,8 +349,9 @@ function playerTriggedEventActionHandling(action, data, game, socket) {
 }
 
 function systemTriggeredEventActionHandling(action, game) {
-  // In case action type was altered during player action syste.
+  // In case action type was altered during player action.
   // These are system triggered actions
+  const currentPlayer = game.getCurrentPlayer();
   let event = null;
 
   switch (action.type) {
@@ -344,7 +362,7 @@ function systemTriggeredEventActionHandling(action, game) {
         type: "AUTO_END_TURN",
         payload: {
           phase: game.phase,
-          playerNumber: game.currentPlayer.playerNumber,
+          playerNumber: currentPlayer.playerNumber,
         },
       };
 
@@ -359,7 +377,7 @@ function systemTriggeredEventActionHandling(action, game) {
       event = {
         type: "AUTO_LOCK_PLAY",
         payload: {
-          currentPlayerNumber: game.currentPlayer.playerNumber,
+          currentPlayerNumber: currentPlayer.playerNumber,
           phase: GamePhases.AUTO_LOCK,
         },
       };
@@ -382,10 +400,12 @@ function systemTriggeredEventActionHandling(action, game) {
       game.changeCurrentPlayer();
       game.changePhase(GamePhases.NEXT);
 
+      const nextPlayer = game.getCurrentPlayer();
+
       event = {
         type: action.type,
         payload: {
-          currentPlayerNumber: game.currentPlayer.playerNumber,
+          currentPlayerNumber: nextPlayer.playerNumber,
           phase: game.phase,
         },
       };
@@ -403,7 +423,7 @@ function systemTriggeredEventActionHandling(action, game) {
       }
 
       // Check if the new current player is already locked. Auto end their turn.
-      if (game.currentPlayer.state === PlayerState.LOCK) {
+      if (nextPlayer.state === PlayerState.LOCK) {
         game.changePhase(GamePhases.AUTO_PLAY);
 
         event = {
@@ -459,7 +479,7 @@ function systemTriggeredEventActionHandling(action, game) {
         dualEmit(event, action.matchKey);
 
         // Schdeula cleanup after clients have time to recieve the event
-        setTimeout(() => cleanupMatch(action.matchKey), 3000);
+        setTimeout(async () => await cleanupMatch(action.matchKey), 3000);
         break;
       }
 

@@ -2,10 +2,27 @@ import { GamePhases, PlayerState } from "../../Shared/enums.js";
 
 export default class Game {
   constructor(config) {
-    this.currentPlayer = null;
+    this.currentPlayerNumber = 1;
     this.phase = GamePhases.NEXT;
     this.player1 = null;
     this.player2 = null;
+  }
+
+  static fromData(data) {
+    const game = new Game();
+
+    game.phase = data.phase;
+    game.currentPlayerNumber = data.currentPlayerNumber;
+
+    if (data.player1) {
+      game.player1 = Player.fromData(data.player1);
+    }
+
+    if (data.player2) {
+      game.player2 = Player.fromData(data.player2);
+    }
+
+    return game;
   }
 
   awardPoint() {
@@ -27,15 +44,7 @@ export default class Game {
   }
 
   changeCurrentPlayer() {
-    const isPlayer1CurrPlayer = this.currentPlayer === this.player1;
-
-    if (isPlayer1CurrPlayer) {
-      this.currentPlayer = this.player2;
-      return;
-    }
-
-    this.currentPlayer = this.player1;
-    return;
+    this.currentPlayerNumber = this.currentPlayerNumber === 1 ? 2 : 1;
   }
 
   changePhase(newPhase) {
@@ -43,9 +52,11 @@ export default class Game {
   }
 
   drawCard() {
+    const currentPlayer = this.getCurrentPlayer();
+
     const randomNumber = Math.floor(Math.random() * 10) + 1;
     const newCard = { number: randomNumber, type: "green" };
-    this.currentPlayer.score += newCard.number;
+    currentPlayer.score += newCard.number;
 
     this.evaluatePlayerState();
     return newCard;
@@ -76,18 +87,17 @@ export default class Game {
   }
 
   evaluatePlayerState() {
-    if (this.currentPlayer.score > 20)
-      this.currentPlayer.state = PlayerState.LOSS;
+    const currentPlayer = this.getCurrentPlayer();
 
-    if (this.currentPlayer.score == 20)
-      this.currentPlayer.state = PlayerState.LOCK;
+    if (currentPlayer.score > 20) currentPlayer.state = PlayerState.LOSS;
 
-    if (this.currentPlayer.score < 20)
-      this.currentPlayer.state = PlayerState.LIVE;
+    if (currentPlayer.score == 20) currentPlayer.state = PlayerState.LOCK;
+
+    if (currentPlayer.score < 20) currentPlayer.state = PlayerState.LIVE;
   }
 
   getCurrentPlayer() {
-    return this.currentPlayer;
+    return this.currentPlayerNumber === 1 ? this.player1 : this.player2;
   }
 
   getPlayerFromSocketId(socketId) {
@@ -106,27 +116,27 @@ export default class Game {
 
   isPlayerTurn(socketId) {
     // Get player associated with Socket:
-    if (this.currentPlayer.socketId === socketId) return true;
+    if (this.getCurrentPlayer().socketId === socketId) return true;
 
     return false;
   }
 
   playCard(cardId) {
-    // Find the played card
-    const playedCard = this.currentPlayer.hand.find(
-      (card) => card.id === cardId,
-    );
+    const currentPlayer = this.getCurrentPlayer();
 
-    this.currentPlayer.hand = this.currentPlayer.hand.filter(
+    // Find the played card
+    const playedCard = currentPlayer.hand.find((card) => card.id === cardId);
+
+    currentPlayer.hand = currentPlayer.hand.filter(
       (card) => card.id !== cardId,
     );
 
     const modifier = playedCard.type === "blue" ? 1 : -1;
     const newScore = Math.max(
       0,
-      this.currentPlayer.score + playedCard.number * modifier,
+      currentPlayer.score + playedCard.number * modifier,
     );
-    this.currentPlayer.score = newScore;
+    currentPlayer.score = newScore;
 
     this.evaluatePlayerState();
     return playedCard;
@@ -143,7 +153,6 @@ export default class Game {
   setPlayer(playerNumber, socketId, userName) {
     if (playerNumber === 1) {
       this.player1 = new Player(1, socketId, userName);
-      this.currentPlayer = this.player1;
       return;
     }
 
@@ -162,6 +171,19 @@ class Player {
     this.score = 0;
     this.socketId = socketId;
     this.state = PlayerState.LIVE;
+  }
+
+  static fromData(data) {
+    const player = new Player(data.playerNumber, data.socketId, data.userName);
+
+    player.hand = data.hand;
+    player.pileTopCard = data.pileTopCard;
+    player.currentPlayerNumber = data.currentPlayerNumber;
+    player.points = data.points;
+    player.score = data.score;
+    player.state = data.state;
+
+    return player;
   }
 
   generateHand() {

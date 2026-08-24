@@ -136,6 +136,14 @@ export default function Game({ socket }) {
   // ---- RENDERING ---------------------------------------------\\
   return (
     <main className={classes["game"]}>
+      {animState.animationType === "ROUND_WON" && (
+        <RoundWonAnimation
+          playerNumber={animState.playerNumber}
+          isPlayerWinner={animState.isPlayerAction}
+          points={animState.points}
+        />
+      )}
+
       {isGameOver && (
         <GameOverPopup
           gameOverReason={gameState.gameOverReason}
@@ -353,6 +361,29 @@ function PlayerBanner({
         </p>
       </div>
     </section>
+  );
+}
+
+function RoundWonAnimation({ isPlayerWinner, points }) {
+  const winnerName = isPlayerWinner ? "YOU" : "OPPONENT";
+
+  return (
+    <div className={classes["game__round-won"]}>
+      <div
+        className={classes["game__round-won-content"]}
+        data-winner={isPlayerWinner ? "player" : "opponent"}
+      >
+        <div className={classes["game__round-won-title"]}>ROUND WON</div>
+
+        <div className={classes["game__round-won-winner"]}>{winnerName}</div>
+
+        <div className={classes["game__round-won-points"]}>+1</div>
+
+        <div className={classes["game__round-won-total"]}>
+          {points} point{points !== 1 ? "s" : ""}
+        </div>
+      </div>
+    </div>
   );
 }
 

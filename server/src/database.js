@@ -1,111 +1,147 @@
+import { Redis } from "@upstash/redis";
 import { faker } from "@faker-js/faker";
 
 import Game from "./Game.js";
 
-const MockDB = {
-  matches: [
-    // {
-    //   matchKey: null,
-    //   game: {},
-    // },
-  ],
-  users: [
-    // { userName: "Testing-001" }
-  ],
+const redis = Redis.fromEnv();
 
-  /* ============================================================= */
-  /* FUNCTIONS */
-  /* ============================================================= */
-  addUser({ socketId }) {
+// Helper to restore class prototype methods on plain JSON game objects
+function rehydrateMatch(rawMatch) {
+  if (!rawMatch) return null;
+
+  const data = typeof rawMatch === "string" ? JSON.parse(rawMatch) : rawMatch;
+
+  return {
+    matchKey: data.matchKey,
+    game: Game.fromData(data.game),
+  };
+}
+
+const redisDatabase = {
+  async addUser({ socketId }) {
     const assignedName =
       `${faker.word.adjective()}-${faker.animal.type()}`.toLowerCase();
-    const newUser = {
-      socketId: socketId,
-      userName: assignedName,
-    };
-
-    this.users.push(newUser);
+    const newUser = { socketId, userName: assignedName };
+    await redis.hset("users", { [socketId]: JSON.stringify(newUser) });
     return newUser;
   },
 
-  createMatch(socketId) {
-    const newMatch = {
-      // Generate a simple, shareable 6-character key
-      matchKey: Math.random().toString(36).substring(2, 8).toUpperCase(),
-      game: new Game(),
-    };
+  async cleanupStaleMatches(activeSocketIds) {
+    const matches = await this.getMatches();
 
-    const userName = this.getUser(socketId).userName;
-    newMatch.game.setPlayer(1, socketId, userName);
+    for (const match of matches) {
+      const player1 = match.game.player1;
+      const player2 = match.game.player2;
 
-    this.matches.push(newMatch);
+      const player1Online = player1 && activeSocketIds.has(player1.socketId);
 
-    return newMatch.matchKey;
+      const player2Online = player2 && activeSocketIds.has(player2.socketId);
+
+      if (!player1Online || !player2Online) {
+        console.log(`Removing stale match: ${match.matchKey}`);
+        await this.deleteMatch(match.matchKey);
+      }
+    }
   },
 
-  deleteMatch(matchKey) {
-    const filteredMatches = this.matches.filter(
-      (match) => match.matchKey !== matchKey,
-    );
-    this.matches = filteredMatches;
+  async cleanupStaleUsers(activeSocketIds) {
+    const users = await this.getUsers();
+
+    for (const user of users) {
+      if (!activeSocketIds.has(user.socketId)) {
+        console.log(`Removing stale user: ${user.userName} (${user.socketId})`);
+
+        await this.deleteUser(user.socketId);
+      }
+    }
   },
 
-  deleteUser(userId) {
-    const filteredUsers = this.users.filter((user) => user.socketId !== userId);
-    this.users = filteredUsers;
+  async createMatch(socketId) {
+    const matchKey = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const user = await this.getUser(socketId);
+
+    const game = new Game();
+    if (user) {
+      game.setPlayer(1, socketId, user.userName);
+    }
+
+    const matchData = { matchKey, game };
+    await redis.hset("matches", { [matchKey]: JSON.stringify(matchData) });
+    return matchKey;
   },
 
-  getMatch(matchKey) {
-    const match = this.matches.find((match) => match.matchKey === matchKey);
-    if (!match) {
-      // throw new Error(`Match with key "${matchKey}" does not exist`);
+  async deleteMatch(matchKey) {
+    await redis.hdel("matches", matchKey);
+  },
+
+  async deleteUser(socketId) {
+    await redis.hdel("users", socketId);
+  },
+
+  async getMatch(matchKey) {
+    const rawMatch = await redis.hget("matches", matchKey);
+    if (!rawMatch) {
       console.log(`Match with key "${matchKey}" does not exist`);
       return null;
     }
-
-    return match;
+    return rehydrateMatch(rawMatch);
   },
 
-  getMatchBySocketId(socketId) {
+  async getMatchBySocketId(socketId) {
+    const matches = await this.getMatches();
     return (
-      this.matches.find((match) => {
+      matches.find((match) => {
         const { player1, player2 } = match.game;
         return player1?.socketId === socketId || player2?.socketId === socketId;
       }) ?? null
     );
   },
 
-  getMatches() {
-    return this.matches;
+  async getMatches() {
+    const rawMatches = await redis.hgetall("matches");
+    if (!rawMatches) return [];
+
+    return Object.values(rawMatches).map((rawMatch) =>
+      rehydrateMatch(rawMatch),
+    );
   },
 
-  getUser(socketId) {
+  async getUser(socketId) {
     try {
-      const foundUser = this.users.find((user) => user.socketId === socketId);
-
-      if (!foundUser) {
+      const user = await redis.hget("users", socketId);
+      if (!user) {
         throw new Error(`User with the socket id: ${socketId} not found!`);
       }
-
-      return foundUser;
+      return typeof user === "string" ? JSON.parse(user) : user;
     } catch (error) {
       console.log(error.message);
+      return null;
     }
-
-    return null;
   },
 
-  getUsers() {
-    return this.users;
+  async getUsers() {
+    const rawUsers = await redis.hgetall("users");
+    if (!rawUsers) return [];
+
+    return Object.values(rawUsers).map((user) =>
+      typeof user === "string" ? JSON.parse(user) : user,
+    );
   },
 
-  joinMatch(matchKey, socketId) {
-    // Set joined player as player 2
-    const userName = this.getUser(socketId).userName;
-    const game = database.getMatch(matchKey).game;
-    game.setPlayer(2, socketId, userName);
+  async joinMatch(matchKey, socketId) {
+    const user = await this.getUser(socketId);
+    const match = await this.getMatch(matchKey);
+
+    if (match && user) {
+      match.game.setPlayer(2, socketId, user.userName);
+      await this.saveMatch(matchKey, match);
+    }
+  },
+
+  async saveMatch(matchKey, match) {
+    await redis.hset("matches", { [matchKey]: JSON.stringify(match) });
   },
 };
 
-const database = MockDB;
+const database = redisDatabase;
 export default database;
