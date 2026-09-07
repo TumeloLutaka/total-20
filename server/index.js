@@ -43,7 +43,18 @@ io.on("connection", async (socket) => {
 
   socket.on("disconnect", async () => {
     console.log("Disconnecting: ", socket.id);
+    await database.deleteUser(socket.id);
     await cleanupStaleState();
+
+    const users = await database.getUsersWithStatus();
+    const rooms = await database.getMatches();
+    io.emit("update_users", { rooms, users });
+  });
+
+  socket.on("get-users", async () => {
+    const users = await database.getUsersWithStatus();
+    const rooms = await database.getMatches();
+    socket.emit("update_users", { rooms, users });
   });
 
   socket.on("get-user-data", async () => {
@@ -58,8 +69,9 @@ io.on("connection", async (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   console.log("Server is running on port: " + PORT);
+  await cleanupStaleState();
 });
 
 // ======================================================== \\

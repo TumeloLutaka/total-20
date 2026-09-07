@@ -38,10 +38,10 @@ const redisDatabase = {
       const player1 = match.game.player1;
       const player2 = match.game.player2;
 
-      const player1Online = player1 && activeSocketIds.has(player1.socketId);
-      const player2Online = player2 && activeSocketIds.has(player2.socketId);
+      const player1Offline = player1 && !activeSocketIds.has(player1.socketId);
+      const player2Offline = player2 && !activeSocketIds.has(player2.socketId);
 
-      if (!player1Online || !player2Online) {
+      if (player1Offline || player2Offline) {
         console.log(`Removing stale match: ${match.matchKey}`);
         await this.deleteMatch(match.matchKey);
       }

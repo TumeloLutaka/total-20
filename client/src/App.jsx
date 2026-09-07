@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
 
 import { socket } from "./services/socket.js";
@@ -13,11 +13,21 @@ function App() {
       setData(newData);
     }
 
-    socket.on("update_users", handleUpdateUsers);
+    function handleConnect() {
+      socket.emit("get-users");
+    }
 
-    // Clean up listener when unmounting
+    socket.on("update_users", handleUpdateUsers);
+    socket.on("connect", handleConnect);
+
+    // Initial fetch if already connected
+    if (socket.connected) {
+      socket.emit("get-users");
+    }
+
     return () => {
       socket.off("update_users", handleUpdateUsers);
+      socket.off("connect", handleConnect);
     };
   }, []); // Run once on mount
 
