@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import Card from "./Card";
 
 export default function OppCard({ animState, cardId, opponentPileRef }) {
@@ -14,13 +14,21 @@ export default function OppCard({ animState, cardId, opponentPileRef }) {
     if (animState?.animationType !== "PLAY_CARD") return;
     if (animState?.playedCard.id !== cardId) return;
 
+    // Use offsetParent-relative coords (same approach as GhostCard) so that
+    // backdrop-filter / stacking contexts on parent elements don't offset us.
+    const parentEl = oppoCardRef.current.offsetParent || document.body;
+    const parentRect = parentEl.getBoundingClientRect();
     const from = oppoCardRef.current.getBoundingClientRect();
+
     setStyle({
-      position: "fixed",
-      left: from.left,
-      top: from.top,
+      position: "absolute",
+      left: from.left - parentRect.left,
+      top: from.top - parentRect.top,
+      width: from.width,
+      height: from.height,
       transition: "none",
       zIndex: 1000,
+      pointerEvents: "none",
     });
 
     setNumber(animState.playedCard.number);
@@ -30,14 +38,16 @@ export default function OppCard({ animState, cardId, opponentPileRef }) {
 
   // ---- FUNCTIONS ---------------------------------------------\\
   const handleFlipEnd = () => {
+    const parentEl = oppoCardRef.current.offsetParent || document.body;
+    const parentRect = parentEl.getBoundingClientRect();
     const to = opponentPileRef.current.getBoundingClientRect();
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         setStyle((s) => ({
           ...s,
-          left: to.left,
-          top: to.top,
+          left: `${to.left - parentRect.left}px`,
+          top: `${to.top - parentRect.top}px`,
           transition:
             "left 500ms ease-out, top 500ms ease-out, transform 500ms ease-out",
         }));

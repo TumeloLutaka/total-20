@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import Card from "./Card";
 
 export default function PlayCard({
@@ -15,24 +15,29 @@ export default function PlayCard({
     if (animState?.animationType !== "PLAY_CARD") return;
     if (animState?.playedCard.id !== card.id) return;
 
+    // Use offsetParent-relative coords to avoid backdrop-filter offset issues.
+    const parentEl = playCardRef.current.offsetParent || document.body;
+    const parentRect = parentEl.getBoundingClientRect();
     const from = playCardRef.current.getBoundingClientRect();
     const to = playerPileRef.current.getBoundingClientRect();
 
     setStyle({
-      position: "fixed",
-      left: from.left,
-      top: from.top,
+      position: "absolute",
+      left: from.left - parentRect.left,
+      top: from.top - parentRect.top,
+      width: from.width,
+      height: from.height,
       transition: "none",
       zIndex: 1000,
+      pointerEvents: "none",
     });
 
-    // 3. Queue the transition for the next available repaint cycles
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         setStyle((prev) => ({
           ...prev,
-          left: to.left,
-          top: to.top,
+          left: `${to.left - parentRect.left}px`,
+          top: `${to.top - parentRect.top}px`,
           transition: "left 500ms ease-out, top 500ms ease-out",
         }));
       });

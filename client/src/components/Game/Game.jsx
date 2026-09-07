@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
-import { useGameEvents } from "../../hooks/useGameEvents";
-import { GamePhases } from "../../../../Shared/enums";
+import { useGameEvents } from "../../delivery/socket/useGameEvents";
+import { GamePhases } from "../../../../Shared/entities/enums.js";
 import Card from "./Card/Card";
 import GhostCard from "./Card/GhostCard";
 import PlayCard from "./Card/PlayCard";
@@ -141,6 +141,11 @@ export default function Game({ socket }) {
           playerNumber={animState.playerNumber}
           isPlayerWinner={animState.isPlayerAction}
           points={animState.points}
+          winnerName={
+            animState.isPlayerAction
+              ? gameState.player?.userName
+              : gameState.opponent?.userName
+          }
         />
       )}
 
@@ -364,18 +369,21 @@ function PlayerBanner({
   );
 }
 
-function RoundWonAnimation({ isPlayerWinner, points }) {
-  const winnerName = isPlayerWinner ? "YOU" : "OPPONENT";
-
+function RoundWonAnimation({ isPlayerWinner, playerNumber, points, winnerName }) {
   return (
     <div className={classes["game__round-won"]}>
       <div
         className={classes["game__round-won-content"]}
         data-winner={isPlayerWinner ? "player" : "opponent"}
       >
-        <div className={classes["game__round-won-title"]}>ROUND WON</div>
+        <div
+          className={classes["game__round-won-winner"]}
+          data-player={playerNumber}
+        >
+          {winnerName ?? `Player ${playerNumber}`}
+        </div>
 
-        <div className={classes["game__round-won-winner"]}>{winnerName}</div>
+        <div className={classes["game__round-won-title"]}>wins the round</div>
 
         <div className={classes["game__round-won-points"]}>+1</div>
 

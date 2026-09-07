@@ -1,11 +1,16 @@
+// ============================================================ \\
+// services/database.js
+// Infrastructure service — Redis-backed persistence for users
+// and matches. No game logic lives here.
+// ============================================================ \\
 import { Redis } from "@upstash/redis";
 import { faker } from "@faker-js/faker";
 
-import Game from "./Game.js";
+import { Game } from "../entities/Game.js";
 
 const redis = Redis.fromEnv();
 
-// Helper to restore class prototype methods on plain JSON game objects
+/** Restores class prototype methods on plain JSON game objects retrieved from Redis. */
 function rehydrateMatch(rawMatch) {
   if (!rawMatch) return null;
 
@@ -34,7 +39,6 @@ const redisDatabase = {
       const player2 = match.game.player2;
 
       const player1Online = player1 && activeSocketIds.has(player1.socketId);
-
       const player2Online = player2 && activeSocketIds.has(player2.socketId);
 
       if (!player1Online || !player2Online) {
@@ -50,7 +54,6 @@ const redisDatabase = {
     for (const user of users) {
       if (!activeSocketIds.has(user.socketId)) {
         console.log(`Removing stale user: ${user.userName} (${user.socketId})`);
-
         await this.deleteUser(user.socketId);
       }
     }
@@ -101,9 +104,7 @@ const redisDatabase = {
     const rawMatches = await redis.hgetall("matches");
     if (!rawMatches) return [];
 
-    return Object.values(rawMatches).map((rawMatch) =>
-      rehydrateMatch(rawMatch),
-    );
+    return Object.values(rawMatches).map((rawMatch) => rehydrateMatch(rawMatch));
   },
 
   async getUser(socketId) {
@@ -141,7 +142,29 @@ const redisDatabase = {
   async saveMatch(matchKey, match) {
     await redis.hset("matches", { [matchKey]: JSON.stringify(match) });
   },
+
+  /**
+   * Returns all users with an extra `inMatch` boolean flag.
+   * Used to let the lobby show which players are currently unavailable.
+   */
+  async getUsersWithStatus() {
+    const users = await this.getUsers();
+    const matches = await this.getMatches();
+
+    // Build a set of socket IDs that are seated in an active match
+    const inMatchIds = new Set();
+    for (const match of matches) {
+      if (match.game.player1?.socketId) inMatchIds.add(match.game.player1.socketId);
+      if (match.game.player2?.socketId) inMatchIds.add(match.game.player2.socketId);
+    }
+
+    return users.map((user) => ({
+      ...user,
+      inMatch: inMatchIds.has(user.socketId),
+    }));
+  },
 };
 
 const database = redisDatabase;
 export default database;
+

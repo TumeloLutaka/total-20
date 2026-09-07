@@ -148,9 +148,19 @@
 
 .game__player-hand,
 .game__opponent-hand {
+  align-items: center;
+  background-color: oklch(0% 0 0 / 0.16);
+  border: 1px solid oklch(100% 0 0 / 0.08);
+  border-radius: var(--radius-300);
+  box-shadow: inset 0 2px 4px oklch(0% 0 0 / 0.22);
+  box-sizing: border-box;
   display: flex;
   gap: var(--sizing-300);
+  justify-content: center;
   margin-inline: auto;
+  min-height: 72px;
+  min-width: 216px;
+  padding: var(--sizing-300) var(--sizing-400);
   width: fit-content;
 }
 
@@ -331,33 +341,47 @@
 }
 
 .game__round-won-content[data-winner="player"] {
-  animation: roundWonToPlayer 1400ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  animation: roundWonToPlayer 2400ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
 }
 
 .game__round-won-content[data-winner="opponent"] {
-  animation: roundWonToOpponent 1400ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  animation: roundWonToOpponent 2400ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+/* Winner name is the headline */
+.game__round-won-winner {
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+
+  &[data-player="1"] {
+    color: var(--_clr-player-1);
+    text-shadow: 0 0 30px color-mix(in oklch, var(--_clr-player-1) 60%, transparent);
+  }
+
+  &[data-player="2"] {
+    color: var(--_clr-player-2);
+    text-shadow: 0 0 30px color-mix(in oklch, var(--_clr-player-2) 60%, transparent);
+  }
 }
 
 .game__round-won-title {
-  font-size: 56px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-}
-
-.game__round-won-winner {
-  font-size: 24px;
-  font-weight: 700;
-  margin-top: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  opacity: 0.75;
+  text-transform: uppercase;
+  margin-top: 6px;
 }
 
 .game__round-won-points {
-  font-size: 42px;
+  font-size: 36px;
   font-weight: 900;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 .game__round-won-total {
-  font-size: 16px;
+  font-size: 14px;
   margin-top: 2px;
-  opacity: 0.8;
+  opacity: 0.7;
 }
